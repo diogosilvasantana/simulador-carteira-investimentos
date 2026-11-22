@@ -21,7 +21,7 @@
     <java.version>25</java.version>
     <spring-modulith.version>2.1.2</spring-modulith.version>
     <archunit.version>1.4.1</archunit.version>
-    <spotless.version>2.44.5</spotless.version>
+    <spotless.version>3.11.0</spotless.version>
     <google-java-format.version>1.28.0</google-java-format.version>
     <jacoco.version>0.8.14</jacoco.version>
     <!-- Cobertura mínima de linhas nos pacotes de domínio e no módulo shared -->
