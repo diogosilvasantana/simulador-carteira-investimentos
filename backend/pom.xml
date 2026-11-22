@@ -24,8 +24,8 @@
     <spotless.version>2.44.5</spotless.version>
     <google-java-format.version>1.28.0</google-java-format.version>
     <jacoco.version>0.8.14</jacoco.version>
-    <error-prone.version>2.49.0</error-prone.version>
-    <nullaway.version>0.13.1</nullaway.version>
+    <error-prone.version>2.52.0</error-prone.version>
+    <nullaway.version>0.14.4</nullaway.version>
     <!-- Cobertura mínima de linhas nos pacotes de domínio e no módulo shared -->
     <coverage.domain.minimum>0.80</coverage.domain.minimum>
   </properties>
