@@ -14,7 +14,7 @@ Adicionar `mvnw` ao repositório e ligar Error Prone + NullAway no compilador, c
 - [ ] Um `null` retornado em API pública marcada com `@NullMarked` quebra a compilação
 - [ ] CI e Dockerfile usam o wrapper
 
-Rótulos: chore, backend
+Rótulos: `type: chore`, `area: backend`
 
 ## 2. chore(ci): SonarQube Cloud com quality gate e selos no README
 
@@ -26,7 +26,7 @@ Conectar o repositório ao SonarQube Cloud (gratuito para repositório público)
 - [ ] Quality gate reprovado bloqueia o merge
 - [ ] Selos de quality gate e cobertura no README
 
-Rótulos: chore, ci
+Rótulos: `type: chore`, `type: ci`
 
 ## 3. feat(backend): persistência com PostgreSQL, Flyway e Testcontainers
 
@@ -38,7 +38,7 @@ Base de persistência para os módulos: Spring Data JPA, migrations Flyway e tes
 - [ ] Teste de integração sobe Postgres via Testcontainers
 - [ ] Event Publication Registry do Modulith persistido em JDBC (ADR-004)
 
-Rótulos: história, backend
+Rótulos: `type: feature`, `area: backend`
 
 ## 4. feat(identity): cadastro e login com JWT (RF01)
 
@@ -51,7 +51,7 @@ Usuário se cadastra com e-mail e senha e recebe um JWT para acessar a API.
 - [ ] Rotas `/api/**` exigem token, exceto cadastro e login
 - [ ] E-mail duplicado devolve 409 em Problem Details
 
-Rótulos: história, identity
+Rótulos: `type: feature`, `module: identity`
 
 ## 5. feat(backend): OpenAPI e erros em Problem Details
 
@@ -63,7 +63,7 @@ Documentar a API com springdoc e padronizar erros no formato RFC 9457.
 - [ ] Exceções de domínio viram Problem Details num único `@RestControllerAdvice`
 - [ ] Erro de validação lista os campos inválidos
 
-Rótulos: história, backend
+Rótulos: `type: feature`, `area: backend`
 
 ## 6. feat(marketdata): catálogo de ativos a partir do COTAHIST
 
@@ -76,7 +76,7 @@ Importar a série histórica da B3 para montar o catálogo de ações, FIIs, ETF
 - [ ] Job diário idempotente: reimportar o mesmo dia não duplica candles
 - [ ] Endpoint de busca de ativos por ticker ou nome
 
-Rótulos: história, marketdata
+Rótulos: `type: feature`, `module: marketdata`
 
 ## 7. feat(marketdata): porta MarketDataSource e replay de candles
 
@@ -89,7 +89,7 @@ Fonte de cotações plugável. Primeira implementação: replay dos candles grav
 - [ ] Testes usam `Clock` fixo, sem `sleep`
 - [ ] Última cotação consultável por ticker
 
-Rótulos: história, marketdata
+Rótulos: `type: feature`, `module: marketdata`
 
 ## 8. feat(portfolio): criar carteira com perfil, capital e alocação-alvo (RF02)
 
@@ -102,7 +102,7 @@ Usuário cria carteiras fictícias para praticar.
 - [ ] Alocação-alvo soma 100% ou é recusada
 - [ ] Usuário só vê as próprias carteiras (QA7)
 
-Rótulos: história, portfolio
+Rótulos: `type: feature`, `module: portfolio`
 
 ## 9. feat(trading): tabela de custos por execução (RF04)
 
@@ -114,7 +114,7 @@ Corretagem configurável e taxas da B3 calculadas por execução, a partir de ta
 - [ ] Nenhuma alíquota fixa no código
 - [ ] Testes parametrizados com casos de fronteira de arredondamento
 
-Rótulos: história, trading
+Rótulos: `type: feature`, `module: trading`
 
 ## 10. feat(trading): ordem a mercado com idempotência (RF03, QA2)
 
@@ -127,7 +127,7 @@ Enviar ordem de compra ou venda executada ao último preço disponível.
 - [ ] Estados da ordem como `sealed interface`
 - [ ] Publica `OrderExecuted` ou `OrderRejected`
 
-Rótulos: história, trading
+Rótulos: `type: feature`, `module: trading`
 
 ## 11. feat(portfolio): aplicar execução na posição e no caixa (RF05, QA1)
 
@@ -140,7 +140,7 @@ Ao receber `OrderExecuted`, atualizar posição, preço médio, resultado realiz
 - [ ] Venda acima da posição nunca chega aqui (recusada antes)
 - [ ] Publica `PositionChanged` e `CashMoved`
 
-Rótulos: história, portfolio
+Rótulos: `type: feature`, `module: portfolio`
 
 ## 12. feat(portfolio): painel da carteira com P&L não realizado
 
@@ -152,7 +152,7 @@ Consultar patrimônio, caixa e posições com resultado não realizado pela últ
 - [ ] Resultado não realizado por ativo e total
 - [ ] Mostra a fonte de dados da carteira (LIVE, REPLAY, SYNTHETIC)
 
-Rótulos: história, portfolio
+Rótulos: `type: feature`, `module: portfolio`
 
 ## 13. chore(infra): primeiro deploy no Coolify
 
@@ -165,7 +165,7 @@ Publicar o compose no servidor Coolify com deploy automático na `main`.
 - [ ] Health check do backend controla o deploy
 - [ ] Backup diário do Postgres configurado
 
-Rótulos: chore, infra
+Rótulos: `type: chore`, `area: infra`
 
 ## 14. docs(adr): registrar o resultado do spike MT5 no ADR-003
 
@@ -176,4 +176,4 @@ Rodar `mt5-bridge/spikes/mt5_spike.py` no pregão e decidir se o ADR-003 passa a
 - [ ] Saída do spike anexada (ativos disponíveis, ticks por minuto, atraso p50/p95)
 - [ ] ADR-003 atualizado para Aceito ou substituído
 
-Rótulos: docs, bridge
+Rótulos: `type: docs`, `area: bridge`

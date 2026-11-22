@@ -8,9 +8,7 @@ MILESTONE="Fase 1 · Núcleo"
 gh api repos/{owner}/{repo}/milestones -f title="$MILESTONE" \
   -f description="Carteiras, ordens a mercado, posição e preço médio" >/dev/null 2>&1 || true
 
-for label in história chore docs ci bug backend frontend bridge infra identity marketdata trading portfolio corporateactions analytics; do
-  gh label create "$label" --force >/dev/null
-done
+# Os rótulos vêm de .github/labels.yml (workflow "Rótulos")
 
 jq -c '.[]' fase-1.json | while read -r issue; do
   title=$(jq -r '.title' <<<"$issue")

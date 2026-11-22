@@ -1,0 +1,120 @@
+name: Release
+
+# Corta uma versão a partir da develop: cria release/vX.Y.Z, atualiza versões e CHANGELOG
+# e abre o PR para a main. Rodar em Actions → Release → Run workflow.
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Tipo de versão (SemVer)"
+        type: choice
+        options: [patch, minor, major]
+        default: minor
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  cut:
+    name: Cortar release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: develop
+          fetch-depth: 0
+
+      - name: Calcular a próxima versão
+        id: version
+        env:
+          BUMP: ${{ inputs.bump }}
+        run: |
+          latest=$(git describe --tags --abbrev=0 --match 'v[0-9]*' 2>/dev/null || echo "v0.0.0")
+          IFS=. read -r major minor patch <<< "${latest#v}"
+          case "$BUMP" in
+            major) major=$((major + 1)); minor=0; patch=0 ;;
+            minor) minor=$((minor + 1)); patch=0 ;;
+            patch) patch=$((patch + 1)) ;;
+          esac
+          version="$major.$minor.$patch"
+          if git ls-remote --exit-code --heads origin "release/v$version" >/dev/null; then
+            echo "::error::A branch release/v$version já existe."
+            exit 1
+          fi
+          echo "Última versão: $latest → nova versão: v$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Atualizar versões das aplicações
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          mvn -B -q -f backend/pom.xml versions:set -DnewVersion="$VERSION" -DgenerateBackupPoms=false
+          (cd frontend && npm version "$VERSION" --no-git-tag-version --allow-same-version)
+          sed -i "s/^version = \".*\"/version = \"$VERSION\"/" mt5-bridge/pyproject.toml
+
+      - name: Gerar CHANGELOG.md
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --tag v${{ steps.version.outputs.version }}
+        env:
+          OUTPUT: CHANGELOG.md
+
+      - name: Notas desta versão
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --unreleased --tag v${{ steps.version.outputs.version }} --strip header
+        env:
+          OUTPUT: RELEASE_NOTES.md
+
+      - name: Criar branch e abrir PR para a main
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          # Um token pessoal (RELEASE_TOKEN) faz a CI rodar no PR criado; com o GITHUB_TOKEN ela não dispara.
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "release/v$VERSION"
+          git add backend/pom.xml frontend/package.json frontend/package-lock.json mt5-bridge/pyproject.toml CHANGELOG.md
+          git commit -m "chore(release): v$VERSION"
+          git push origin "release/v$VERSION"
+          {
+            echo "## 🔖 Release v$VERSION"
+            echo
+            echo "Promove para **produção** o que está validado em **staging** (develop)."
+            echo
+            echo "> Faça o merge com **Create a merge commit** (não squash), para preservar o histórico."
+            echo "> Ao concluir: a tag \`v$VERSION\` e a GitHub Release são criadas, o deploy de produção"
+            echo "> dispara e um PR de volta para a develop é aberto automaticamente."
+            echo
+            echo "### ✅ Antes do merge"
+            echo
+            echo "- [ ] Staging validado (fluxos principais testados)"
+            echo "- [ ] CHANGELOG revisado"
+            echo "- [ ] Migrations conferidas"
+            echo
+            echo "---"
+            echo
+            cat RELEASE_NOTES.md
+          } > pr-body.md
+          gh pr create --base main --head "release/v$VERSION" \
+            --title "chore(release): v$VERSION" \
+            --body-file pr-body.md \
+            --label "type: release"

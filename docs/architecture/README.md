@@ -175,8 +175,9 @@ Cotações em signals, valores derivados em `computed`.
 | `backend` | `/api` e `/ws` pelo domínio; `/ingest` só na Tailscale |
 | `postgres`, `redis` | Rede interna |
 
-CI: PR roda build, testes, ArchUnit e lint por caminho; merge na `main` publica imagens no GHCR
-e o Coolify faz o deploy com health check.
+Gitflow (ADR-008): `develop` publica em staging e `main` em produção, pelo workflow `Deploy` que
+chama a API do Coolify. CI por caminho em todo PR (build, testes, ArchUnit, lint, título, commits
+e política de branches); o workflow `Release` corta versões com CHANGELOG e tag.
 
 ## 10. Roadmap
 

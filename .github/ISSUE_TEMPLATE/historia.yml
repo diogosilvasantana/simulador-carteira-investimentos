@@ -1,6 +1,6 @@
 name: História
 description: Funcionalidade com critério de aceite
-labels: ["história"]
+labels: ["type: feature"]
 body:
   - type: textarea
     id: objetivo
