@@ -1,0 +1,26 @@
+name: História
+description: Funcionalidade com critério de aceite
+labels: ["história"]
+body:
+  - type: textarea
+    id: objetivo
+    attributes:
+      label: Objetivo
+      description: Como usuário, quero... para...
+    validations: { required: true }
+  - type: textarea
+    id: aceite
+    attributes:
+      label: Critérios de aceite
+      description: Cenários verificáveis (Dado / Quando / Então). Viram testes.
+    validations: { required: true }
+  - type: dropdown
+    id: modulo
+    attributes:
+      label: Módulo
+      options: [identity, marketdata, trading, portfolio, corporateactions, analytics, frontend, bridge, infra]
+    validations: { required: true }
+  - type: textarea
+    id: notas
+    attributes:
+      label: Notas técnicas

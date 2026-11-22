@@ -1,0 +1,114 @@
+[
+  {
+    "title": "chore(backend): Maven Wrapper, Error Prone e NullAway",
+    "labels": [
+      "chore",
+      "backend"
+    ],
+    "body": "Adicionar `mvnw` ao repositório e ligar Error Prone + NullAway no compilador, conforme a seção de padrões da arquitetura.\n\n## Critérios de aceite\n\n- [ ] `./mvnw verify` funciona sem Maven instalado\n- [ ] Um `null` retornado em API pública marcada com `@NullMarked` quebra a compilação\n- [ ] CI e Dockerfile usam o wrapper"
+  },
+  {
+    "title": "chore(ci): SonarQube Cloud com quality gate e selos no README",
+    "labels": [
+      "chore",
+      "ci"
+    ],
+    "body": "Conectar o repositório ao SonarQube Cloud (gratuito para repositório público) e enviar a cobertura do JaCoCo.\n\n## Critérios de aceite\n\n- [ ] Análise roda em todo PR\n- [ ] Quality gate reprovado bloqueia o merge\n- [ ] Selos de quality gate e cobertura no README"
+  },
+  {
+    "title": "feat(backend): persistência com PostgreSQL, Flyway e Testcontainers",
+    "labels": [
+      "história",
+      "backend"
+    ],
+    "body": "Base de persistência para os módulos: Spring Data JPA, migrations Flyway e testes de integração com Postgres real.\n\n## Critérios de aceite\n\n- [ ] Migration `V1__baseline.sql` aplicada na subida\n- [ ] Teste de integração sobe Postgres via Testcontainers\n- [ ] Event Publication Registry do Modulith persistido em JDBC (ADR-004)"
+  },
+  {
+    "title": "feat(identity): cadastro e login com JWT (RF01)",
+    "labels": [
+      "história",
+      "identity"
+    ],
+    "body": "Usuário se cadastra com e-mail e senha e recebe um JWT para acessar a API.\n\n## Critérios de aceite\n\n- [ ] Senha guardada com BCrypt\n- [ ] Login devolve access token de vida curta e refresh token\n- [ ] Rotas `/api/**` exigem token, exceto cadastro e login\n- [ ] E-mail duplicado devolve 409 em Problem Details"
+  },
+  {
+    "title": "feat(backend): OpenAPI e erros em Problem Details",
+    "labels": [
+      "história",
+      "backend"
+    ],
+    "body": "Documentar a API com springdoc e padronizar erros no formato RFC 9457.\n\n## Critérios de aceite\n\n- [ ] Swagger UI em `/swagger-ui.html` e contrato em `/v3/api-docs`\n- [ ] Exceções de domínio viram Problem Details num único `@RestControllerAdvice`\n- [ ] Erro de validação lista os campos inválidos"
+  },
+  {
+    "title": "feat(marketdata): catálogo de ativos a partir do COTAHIST",
+    "labels": [
+      "história",
+      "marketdata"
+    ],
+    "body": "Importar a série histórica da B3 para montar o catálogo de ações, FIIs, ETFs e BDRs do mercado à vista e seus candles diários.\n\n## Critérios de aceite\n\n- [ ] Parser do layout COTAHIST com testes sobre um arquivo de amostra\n- [ ] Filtra mercado à vista (lote padrão e fracionário)\n- [ ] Job diário idempotente: reimportar o mesmo dia não duplica candles\n- [ ] Endpoint de busca de ativos por ticker ou nome"
+  },
+  {
+    "title": "feat(marketdata): porta MarketDataSource e replay de candles",
+    "labels": [
+      "história",
+      "marketdata"
+    ],
+    "body": "Fonte de cotações plugável. Primeira implementação: replay dos candles gravados, com velocidade configurável e relógio injetável.\n\n## Critérios de aceite\n\n- [ ] `QuoteUpdated` publicado a cada novo preço\n- [ ] Replay a 1×, 10× e 60× controlado por configuração\n- [ ] Testes usam `Clock` fixo, sem `sleep`\n- [ ] Última cotação consultável por ticker"
+  },
+  {
+    "title": "feat(portfolio): criar carteira com perfil, capital e alocação-alvo (RF02)",
+    "labels": [
+      "história",
+      "portfolio"
+    ],
+    "body": "Usuário cria carteiras fictícias para praticar.\n\n## Critérios de aceite\n\n- [ ] Perfil: renda passiva, valorização ou mista\n- [ ] Capital inicial vira caixa (`Money`)\n- [ ] Alocação-alvo soma 100% ou é recusada\n- [ ] Usuário só vê as próprias carteiras (QA7)"
+  },
+  {
+    "title": "feat(trading): tabela de custos por execução (RF04)",
+    "labels": [
+      "história",
+      "trading"
+    ],
+    "body": "Corretagem configurável e taxas da B3 calculadas por execução, a partir de tabela versionada por data.\n\n## Critérios de aceite\n\n- [ ] Valores conferidos na fonte oficial e registrados com data de vigência\n- [ ] Nenhuma alíquota fixa no código\n- [ ] Testes parametrizados com casos de fronteira de arredondamento"
+  },
+  {
+    "title": "feat(trading): ordem a mercado com idempotência (RF03, QA2)",
+    "labels": [
+      "história",
+      "trading"
+    ],
+    "body": "Enviar ordem de compra ou venda executada ao último preço disponível.\n\n## Critérios de aceite\n\n- [ ] Chave de idempotência: a mesma ordem enviada duas vezes gera uma única execução\n- [ ] Recusa com motivo: sem caixa, sem posição, sem cotação ou feed `STALE`\n- [ ] Estados da ordem como `sealed interface`\n- [ ] Publica `OrderExecuted` ou `OrderRejected`"
+  },
+  {
+    "title": "feat(portfolio): aplicar execução na posição e no caixa (RF05, QA1)",
+    "labels": [
+      "história",
+      "portfolio"
+    ],
+    "body": "Ao receber `OrderExecuted`, atualizar posição, preço médio, resultado realizado e caixa.\n\n## Critérios de aceite\n\n- [ ] Teste do cenário QA1: 3 compras de PETR4 com preços e custos diferentes batem até o centavo\n- [ ] Venda não altera o preço médio e registra resultado realizado\n- [ ] Venda acima da posição nunca chega aqui (recusada antes)\n- [ ] Publica `PositionChanged` e `CashMoved`"
+  },
+  {
+    "title": "feat(portfolio): painel da carteira com P&L não realizado",
+    "labels": [
+      "história",
+      "portfolio"
+    ],
+    "body": "Consultar patrimônio, caixa e posições com resultado não realizado pela última cotação.\n\n## Critérios de aceite\n\n- [ ] Patrimônio = caixa + soma das posições a mercado\n- [ ] Resultado não realizado por ativo e total\n- [ ] Mostra a fonte de dados da carteira (LIVE, REPLAY, SYNTHETIC)"
+  },
+  {
+    "title": "chore(infra): primeiro deploy no Coolify",
+    "labels": [
+      "chore",
+      "infra"
+    ],
+    "body": "Publicar o compose no servidor Coolify com deploy automático na `main`.\n\n## Critérios de aceite\n\n- [ ] Frontend acessível por domínio com HTTPS\n- [ ] Backend, Postgres e Redis sem porta pública\n- [ ] Health check do backend controla o deploy\n- [ ] Backup diário do Postgres configurado"
+  },
+  {
+    "title": "docs(adr): registrar o resultado do spike MT5 no ADR-003",
+    "labels": [
+      "docs",
+      "bridge"
+    ],
+    "body": "Rodar `mt5-bridge/spikes/mt5_spike.py` no pregão e decidir se o ADR-003 passa a Aceito.\n\n## Critérios de aceite\n\n- [ ] Saída do spike anexada (ativos disponíveis, ticks por minuto, atraso p50/p95)\n- [ ] ADR-003 atualizado para Aceito ou substituído"
+  }
+]

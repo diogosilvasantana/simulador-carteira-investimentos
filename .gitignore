@@ -1,0 +1,32 @@
+# IDEs e SO
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+
+# Java / Maven
+backend/target/
+*.class
+hs_err_pid*
+
+# Node / Angular
+node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/coverage/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+mt5-bridge/*.csv
+
+# Segredos e ambiente
+.env
+.env.*
+!.env.example

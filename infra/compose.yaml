@@ -1,0 +1,51 @@
+# Sobe o sistema inteiro. No Coolify, associe o domínio público só ao serviço "frontend".
+name: simulador-carteira
+
+services:
+  frontend:
+    build: ../frontend
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-8081}:80"
+
+  backend:
+    build: ../backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/simulador
+      SPRING_DATASOURCE_USERNAME: simulador
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD}
+      SPRING_DATA_REDIS_HOST: redis
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # A ingestão de ticks (fase 2) só é publicada no IP da Tailscale do host, nunca em 0.0.0.0
+    # ports:
+    #   - "${TAILSCALE_IP}:8090:8090"
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: simulador
+      POSTGRES_USER: simulador
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U simulador -d simulador"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:
