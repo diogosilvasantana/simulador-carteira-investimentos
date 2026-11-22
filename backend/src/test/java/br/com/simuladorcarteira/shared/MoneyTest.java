@@ -72,6 +72,7 @@ class MoneyTest {
   }
 
   @Test
+  @SuppressWarnings("NullAway") // passa null de propósito para provar a validação em tempo de execução
   void shouldRejectNullAmount() {
     assertThatThrownBy(() -> Money.brl((BigDecimal) null)).isInstanceOf(NullPointerException.class);
   }
