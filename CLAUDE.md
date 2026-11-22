@@ -53,6 +53,9 @@ Use sempre estes nomes no código. Se um conceito novo surgir, adicione-o aqui e
 - Erros de domínio são exceções específicas, traduzidas para Problem Details (RFC 9457)
 - Sem números mágicos: custos e alíquotas vêm de configuração versionada por data
 - Comentários explicam o porquê, não o quê
+- Todo pacote novo ganha um `package-info.java` com `@org.jspecify.annotations.NullMarked`; o que
+  pode ser nulo é marcado com `@Nullable` (NullAway quebra a compilação no resto)
+- Maven sempre pelo wrapper (`./mvnw`), nunca um Maven instalado na máquina (ADR-009)
 
 ## Testes
 
@@ -67,8 +70,8 @@ Use sempre estes nomes no código. Se um conceito novo surgir, adicione-o aqui e
 
 | O quê | Comando |
 | --- | --- |
-| Testes e verificações do backend | `cd backend && mvn verify` |
-| Formatar o backend | `cd backend && mvn spotless:apply` |
+| Testes e verificações do backend | `cd backend && ./mvnw verify` |
+| Formatar o backend | `cd backend && ./mvnw spotless:apply` |
 | Lint e testes do frontend | `cd frontend && npm run lint && npm test -- --watch=false` |
 | Build do frontend | `cd frontend && npm run build` |
 | Lint e tipos da ponte | `cd mt5-bridge && ruff check . && ruff format --check . && mypy .` |
