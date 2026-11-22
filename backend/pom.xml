@@ -92,7 +92,7 @@
 
       <!--
         Análise estática no compilador: Error Prone pega erros comuns e o NullAway impede
-        nulos onde não deveria haver (pacotes com @NullMarked). Os --add-exports do javac
+        nulos onde não deveria haver (pacotes com @NullMarked). As opções add-exports do javac
         ficam em .mvn/jvm.config.
       -->
       <plugin>
