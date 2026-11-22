@@ -1,0 +1,19 @@
+.lead {
+  color: var(--muted);
+  max-width: 60ch;
+}
+
+.phases {
+  display: grid;
+  gap: 0.5rem;
+  padding-left: 1.25rem;
+
+  li {
+    display: flex;
+    flex-direction: column;
+  }
+
+  span {
+    color: var(--muted);
+  }
+}

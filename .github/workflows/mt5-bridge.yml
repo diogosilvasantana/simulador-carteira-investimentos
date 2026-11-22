@@ -1,0 +1,28 @@
+name: MT5 Bridge CI
+
+on:
+  pull_request:
+    paths: ["mt5-bridge/**", ".github/workflows/mt5-bridge.yml"]
+  push:
+    branches: [main]
+    paths: ["mt5-bridge/**", ".github/workflows/mt5-bridge.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mt5-bridge
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]"
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: mypy .
+      - run: pytest

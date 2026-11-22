@@ -1,0 +1,14 @@
+name: Bug
+description: Algo não funciona como deveria
+labels: ["bug"]
+body:
+  - type: textarea
+    id: passos
+    attributes:
+      label: Passos para reproduzir
+    validations: { required: true }
+  - type: textarea
+    id: esperado
+    attributes:
+      label: Resultado esperado e resultado obtido
+    validations: { required: true }
