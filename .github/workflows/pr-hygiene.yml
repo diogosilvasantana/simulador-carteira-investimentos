@@ -40,6 +40,8 @@ jobs:
 
   title:
     name: Título em Conventional Commits
+    # O Dependabot usa "Bump ..." com maiúscula; o prefixo dele já segue a convenção.
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: amannn/action-semantic-pull-request@v5
