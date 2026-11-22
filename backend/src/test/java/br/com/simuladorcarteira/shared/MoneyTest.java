@@ -73,8 +73,7 @@ class MoneyTest {
 
   @Test
   void shouldRejectNullAmount() {
-    assertThatThrownBy(() -> Money.brl((BigDecimal) null))
-        .isInstanceOf(NullPointerException.class);
+    assertThatThrownBy(() -> Money.brl((BigDecimal) null)).isInstanceOf(NullPointerException.class);
   }
 
   @Test
