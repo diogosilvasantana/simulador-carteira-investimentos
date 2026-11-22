@@ -1,6 +1,6 @@
 name: Bug
 description: Algo não funciona como deveria
-labels: ["bug"]
+labels: ["type: fix"]
 body:
   - type: textarea
     id: passos

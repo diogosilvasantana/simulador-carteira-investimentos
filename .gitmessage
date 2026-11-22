@@ -1,0 +1,11 @@
+# tipo(escopo): descrição curta no imperativo (máx. 100 caracteres)
+#
+# Tipos:   feat fix refactor perf test docs style build ci chore revert
+# Escopos: backend frontend bridge infra | identity marketdata trading portfolio
+#          corporateactions analytics shared simulator | docs adr ci deps release
+#
+# Corpo (opcional): o porquê da mudança, não o como.
+#
+# Rodapé (opcional):
+#   Closes #123
+#   BREAKING CHANGE: o que quebra e como migrar

@@ -73,10 +73,15 @@ Use sempre estes nomes no código. Se um conceito novo surgir, adicione-o aqui e
 | Build do frontend | `cd frontend && npm run build` |
 | Lint e tipos da ponte | `cd mt5-bridge && ruff check . && ruff format --check . && mypy .` |
 
-## Fluxo de trabalho
+## Fluxo de trabalho (Gitflow, ADR-008)
 
-- Uma issue por branch, branch curta a partir da `main` (`feat/…`, `fix/…`, `chore/…`, `docs/…`)
-- Commits em Conventional Commits com escopo: `feat(trading): …`, `fix(frontend): …`
-- Todo PR preenche a Definition of Done do template
+- `develop` = staging, `main` = produção. Nunca commitar direto em nenhuma das duas
+- Trabalho em branch a partir da `develop`: `feat/<issue>-<descricao>`, `fix/…`, `refactor/…`,
+  `docs/…`, `chore/…`, `ci/…`, `test/…`, `perf/…`; PR de volta para a `develop` (squash)
+- Só `release/vX.Y.Z` (criada pelo workflow Release) e `hotfix/*` entram na `main` (merge commit)
+- Commits e título do PR em Conventional Commits com escopo da lista do `commitlint.config.mjs`:
+  `feat(trading): …`, `fix(frontend): …`. Descrição em português, minúscula, no imperativo
+- Todo PR preenche o template (resumo, issue, como testar, Definition of Done)
+- Não editar `CHANGELOG.md` nem versões à mão: o workflow Release cuida disso
 - Decisão de arquitetura nova = ADR novo em `docs/adr/` no mesmo PR
 - Nunca commitar segredos; configuração por variáveis de ambiente

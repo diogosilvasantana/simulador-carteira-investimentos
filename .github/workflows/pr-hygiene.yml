@@ -1,0 +1,118 @@
+name: PR
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  branch-policy:
+    name: Política de branches
+    runs-on: ubuntu-latest
+    steps:
+      - name: Conferir origem e destino do PR
+        env:
+          BASE: ${{ github.base_ref }}
+          HEAD: ${{ github.head_ref }}
+        run: |
+          echo "PR de '$HEAD' para '$BASE'"
+          case "$BASE" in
+            main)
+              if [[ ! "$HEAD" =~ ^(release|hotfix)/ ]]; then
+                echo "::error::Só branches release/* ou hotfix/* entram na main. Abra este PR para a develop."
+                exit 1
+              fi ;;
+            develop)
+              if [[ ! "$HEAD" =~ ^(feat|feature|fix|refactor|perf|test|docs|chore|ci|build|dependabot)/ && "$HEAD" != "main" ]]; then
+                echo "::error::Nome de branch fora do padrão. Use feat/, fix/, refactor/, perf/, test/, docs/, chore/ ou ci/ (ex.: feat/12-preco-medio)."
+                exit 1
+              fi ;;
+          esac
+          echo "✅ Fluxo permitido"
+
+  title:
+    name: Título em Conventional Commits
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            refactor
+            perf
+            test
+            docs
+            style
+            build
+            ci
+            chore
+            revert
+          requireScope: false
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            A descrição "{subject}" deve começar com letra minúscula, no imperativo.
+            Ex.: "feat(trading): executar ordem a mercado"
+
+  commits:
+    name: Commits em Conventional Commits
+    if: github.base_ref == 'develop'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: wagoid/commitlint-github-action@v6
+        with:
+          configFile: commitlint.config.mjs
+
+  labels:
+    name: Rótulos automáticos
+    if: github.event.action != 'edited'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Área, módulo e tipo
+        uses: actions/labeler@v5
+        with:
+          sync-labels: false
+      - name: Tamanho
+        uses: codelytv/pr-size-labeler@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          xs_label: "size: XS"
+          xs_max_size: "10"
+          s_label: "size: S"
+          s_max_size: "100"
+          m_label: "size: M"
+          m_max_size: "500"
+          l_label: "size: L"
+          l_max_size: "1000"
+          xl_label: "size: XL"
+          fail_if_xl: "false"
+          message_if_xl: >
+            Este PR passou de 1000 linhas. Se der, divida em partes menores:
+            PRs pequenos são revisados melhor e mais rápido.
+          files_to_ignore: |
+            package-lock.json
+            frontend/package-lock.json
+            CHANGELOG.md
+      - name: Autor como responsável
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.pull_request.number }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          AUTHOR_TYPE: ${{ github.event.pull_request.user.type }}
+        run: |
+          if [[ "$AUTHOR_TYPE" == "User" ]]; then
+            gh api "repos/$GITHUB_REPOSITORY/issues/$NUMBER/assignees" -f "assignees[]=$AUTHOR" >/dev/null
+          fi

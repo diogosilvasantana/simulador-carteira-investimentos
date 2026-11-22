@@ -4,7 +4,7 @@ on:
   pull_request:
     paths: ["mt5-bridge/**", ".github/workflows/mt5-bridge.yml"]
   push:
-    branches: [main]
+    branches: [main, develop]
     paths: ["mt5-bridge/**", ".github/workflows/mt5-bridge.yml"]
 
 permissions:

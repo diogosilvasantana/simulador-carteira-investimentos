@@ -3,20 +3,24 @@ updates:
   - package-ecosystem: maven
     directory: /backend
     schedule: { interval: weekly }
+    target-branch: develop
     commit-message: { prefix: "build(backend)" }
     groups:
       spring: { patterns: ["org.springframework*"] }
   - package-ecosystem: npm
     directory: /frontend
     schedule: { interval: weekly }
+    target-branch: develop
     commit-message: { prefix: "build(frontend)" }
     groups:
       angular: { patterns: ["@angular*", "angular-eslint"] }
   - package-ecosystem: pip
     directory: /mt5-bridge
     schedule: { interval: weekly }
+    target-branch: develop
     commit-message: { prefix: "build(bridge)" }
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: weekly }
+    target-branch: develop
     commit-message: { prefix: "ci" }

@@ -1,14 +1,47 @@
-## O que muda
+<!--
+  Título do PR = mensagem do commit no squash. Use Conventional Commits:
+  feat(trading): executar ordem a mercado ao último preço
+-->
 
-<!-- Uma ou duas frases. Ex.: executa ordens a mercado ao último preço e atualiza o caixa. -->
+## 📌 Resumo
 
-Fecha #
+<!-- O que muda e por quê, em uma ou duas frases. -->
 
-## Como testar
+## 🔗 Issue
 
-<!-- Comandos ou passos para conferir. -->
+Closes #
 
-## Definition of Done
+## 🧩 Tipo de mudança
+
+- [ ] 🚀 Nova funcionalidade
+- [ ] 🐛 Correção de bug
+- [ ] ♻️ Refatoração (sem mudar comportamento)
+- [ ] 📝 Documentação / ADR
+- [ ] 🔧 Manutenção, build ou CI
+- [ ] 💥 Quebra compatibilidade (descreva abaixo)
+
+## 🛠️ O que foi feito
+
+<!-- Lista curta das mudanças principais. -->
+
+-
+
+## 🧪 Como testar
+
+<!-- Comandos ou passos. Ex.: `cd backend && mvn verify`, abrir /carteiras e comprar 100 PETR4. -->
+
+1.
+
+## 📸 Evidências
+
+<!-- Prints, GIFs ou saída de comando, quando mudar algo visível. Apague se não se aplica. -->
+
+## 💥 Breaking changes
+
+<!-- O que quebra e como migrar. Apague se não se aplica. -->
+
+<details>
+<summary><strong>✅ Definition of Done</strong></summary>
 
 - [ ] Testes novos cobrindo o comportamento, todos verdes na CI
 - [ ] Quality gate aprovado, sem novo code smell crítico
@@ -17,3 +50,5 @@ Fecha #
 - [ ] Migration Flyway incluída, se mudou o banco
 - [ ] ADR escrito, se houve decisão de arquitetura
 - [ ] README ou docs atualizados, se mudou algo que quem chega precisa saber
+
+</details>

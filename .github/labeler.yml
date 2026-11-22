@@ -1,0 +1,65 @@
+# Rótulos aplicados automaticamente em cada PR (actions/labeler v5).
+
+# Área: pelos arquivos alterados
+"area: backend":
+  - changed-files:
+      - any-glob-to-any-file: "backend/**"
+"area: frontend":
+  - changed-files:
+      - any-glob-to-any-file: "frontend/**"
+"area: bridge":
+  - changed-files:
+      - any-glob-to-any-file: "mt5-bridge/**"
+"area: infra":
+  - changed-files:
+      - any-glob-to-any-file: ["infra/**", "**/Dockerfile", "**/nginx.conf"]
+"area: docs":
+  - changed-files:
+      - any-glob-to-any-file: ["docs/**", "**/*.md"]
+"area: ci":
+  - changed-files:
+      - any-glob-to-any-file: ".github/**"
+
+# Módulo: pelo pacote Java alterado
+"module: identity":
+  - changed-files:
+      - any-glob-to-any-file: "backend/src/*/java/br/com/simuladorcarteira/identity/**"
+"module: marketdata":
+  - changed-files:
+      - any-glob-to-any-file: "backend/src/*/java/br/com/simuladorcarteira/marketdata/**"
+"module: trading":
+  - changed-files:
+      - any-glob-to-any-file: "backend/src/*/java/br/com/simuladorcarteira/trading/**"
+"module: portfolio":
+  - changed-files:
+      - any-glob-to-any-file: "backend/src/*/java/br/com/simuladorcarteira/portfolio/**"
+"module: corporateactions":
+  - changed-files:
+      - any-glob-to-any-file: "backend/src/*/java/br/com/simuladorcarteira/corporateactions/**"
+"module: analytics":
+  - changed-files:
+      - any-glob-to-any-file: "backend/src/*/java/br/com/simuladorcarteira/analytics/**"
+
+# Tipo: pelo nome da branch
+"type: feature":
+  - head-branch: ["^feat/", "^feature/"]
+"type: fix":
+  - head-branch: ["^fix/"]
+"type: hotfix":
+  - head-branch: ["^hotfix/"]
+"type: refactor":
+  - head-branch: ["^refactor/"]
+"type: perf":
+  - head-branch: ["^perf/"]
+"type: test":
+  - head-branch: ["^test/"]
+"type: docs":
+  - head-branch: ["^docs/"]
+"type: chore":
+  - head-branch: ["^chore/"]
+"type: ci":
+  - head-branch: ["^ci/"]
+"type: release":
+  - head-branch: ["^release/"]
+"dependencies":
+  - head-branch: ["^dependabot/"]

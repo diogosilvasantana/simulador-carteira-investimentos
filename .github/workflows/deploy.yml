@@ -1,0 +1,46 @@
+name: Deploy
+
+# develop → staging, main → produção. O deploy é feito pelo Coolify via API.
+# Configure em Settings → Environments, para "staging" e "production":
+#   variáveis COOLIFY_URL, COOLIFY_RESOURCE_UUID e APP_URL; segredo COOLIFY_TOKEN.
+
+on:
+  push:
+    branches: [develop, main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Ambiente"
+        type: choice
+        options: [staging, production]
+        default: staging
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy em ${{ inputs.environment || (github.ref_name == 'main' && 'production' || 'staging') }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment || (github.ref_name == 'main' && 'production' || 'staging') }}
+      url: ${{ vars.APP_URL }}
+    steps:
+      - name: Disparar deploy no Coolify
+        env:
+          COOLIFY_URL: ${{ vars.COOLIFY_URL }}
+          COOLIFY_RESOURCE_UUID: ${{ vars.COOLIFY_RESOURCE_UUID }}
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+        run: |
+          if [[ -z "$COOLIFY_URL" || -z "$COOLIFY_RESOURCE_UUID" || -z "$COOLIFY_TOKEN" ]]; then
+            echo "::warning::Ambiente sem configuração do Coolify; deploy ignorado. Veja infra/README.md."
+            exit 0
+          fi
+          curl --fail --silent --show-error \
+            -H "Authorization: Bearer $COOLIFY_TOKEN" \
+            "$COOLIFY_URL/api/v1/deploy?uuid=$COOLIFY_RESOURCE_UUID&force=false"
+          echo "🚀 Deploy disparado em ${{ github.ref_name }} ($GITHUB_SHA)"
