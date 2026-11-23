@@ -1,0 +1,64 @@
+name: Publicar release
+
+# Quando um PR release/* ou hotfix/* é mergeado na main: cria a tag e a GitHub Release
+# e abre o PR de volta (back-merge) da main para a develop.
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  publish:
+    name: Tag, release e back-merge
+    if: >
+      github.event.pull_request.merged == true &&
+      (startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'hotfix/'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Definir versão
+        id: version
+        env:
+          HEAD: ${{ github.head_ref }}
+        run: |
+          if [[ "$HEAD" =~ ^release/v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            version="${BASH_REMATCH[1]}"
+          else
+            # hotfix: incrementa o patch da última tag
+            latest=$(git describe --tags --abbrev=0 --match 'v[0-9]*' 2>/dev/null || echo "v0.0.0")
+            IFS=. read -r major minor patch <<< "${latest#v}"
+            version="$major.$minor.$((patch + 1))"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Criar tag e GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+          SHA: ${{ github.event.pull_request.merge_commit_sha }}
+        run: |
+          gh release create "v$VERSION" \
+            --target "$SHA" \
+            --title "v$VERSION" \
+            --generate-notes \
+            --latest
+
+      - name: Abrir back-merge para a develop
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          gh pr create --base develop --head main \
+            --title "chore(release): back-merge v$VERSION para develop" \
+            --label "type: chore" --label "skip-changelog" \
+            --body "Traz para a develop o que entrou na main na v$VERSION (versões, CHANGELOG e hotfixes). Faça o merge com **Create a merge commit**." \
+          || echo "::notice::Nada para trazer de volta ou PR já existente."

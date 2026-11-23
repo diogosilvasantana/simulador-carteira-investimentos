@@ -66,10 +66,18 @@ cd frontend && npm ci && npm start
 docker compose -f infra/compose.yaml up --build
 ```
 
-## Como contribuir
+## Fluxo de desenvolvimento
 
-Leia o [`CONTRIBUTING.md`](CONTRIBUTING.md): fluxo trunk-based, Conventional Commits e a
-Definition of Done de cada pull request.
+Gitflow simplificado com dois ambientes ([ADR-008](docs/adr/0008-gitflow-com-staging-e-releases.md)):
+
+| Branch | Ambiente | Como o código chega |
+| --- | --- | --- |
+| `develop` | 🧪 staging | PRs de `feat/`, `fix/`, `docs/`… (squash) |
+| `main` | 🚀 produção | PR de `release/vX.Y.Z` gerado pelo workflow Release, ou `hotfix/*` |
+
+Commits e títulos de PR em Conventional Commits, rótulos automáticos por área, módulo, tipo e
+tamanho, CHANGELOG e notas de versão gerados a cada release. Detalhes no
+[`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Aviso sobre dados de mercado
 

@@ -13,7 +13,7 @@
 
   <groupId>br.com.simuladorcarteira</groupId>
   <artifactId>simulador-carteira-backend</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.1.0</version>
   <name>simulador-carteira-backend</name>
   <description>Backend do simulador de carteira de investimentos (monólito modular)</description>
 

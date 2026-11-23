@@ -1,0 +1,21 @@
+# Categorias das notas de versão geradas automaticamente pelo GitHub (por rótulo do PR).
+changelog:
+  exclude:
+    labels: ["skip-changelog", "type: release"]
+  categories:
+    - title: "💥 Mudanças que quebram compatibilidade"
+      labels: ["breaking change"]
+    - title: "🚀 Novidades"
+      labels: ["type: feature"]
+    - title: "🐛 Correções"
+      labels: ["type: fix", "type: hotfix"]
+    - title: "⚡ Desempenho e ♻️ refatorações"
+      labels: ["type: perf", "type: refactor"]
+    - title: "📝 Documentação"
+      labels: ["type: docs"]
+    - title: "📦 Dependências"
+      labels: ["dependencies"]
+    - title: "🔧 Manutenção, testes e CI"
+      labels: ["type: chore", "type: ci", "type: test"]
+    - title: "Outras mudanças"
+      labels: ["*"]

@@ -1,0 +1,14 @@
+{
+  "name": "simulador-carteira-investimentos",
+  "private": true,
+  "description": "Ferramentas do repositório (hooks de commit). Cada aplicação tem seu próprio build.",
+  "scripts": {
+    "prepare": "husky",
+    "commitlint": "commitlint --edit"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.0.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "husky": "^9.1.0"
+  }
+}
