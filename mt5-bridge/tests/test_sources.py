@@ -4,7 +4,13 @@ from types import SimpleNamespace
 
 from mt5_bridge.protocol import Source
 from mt5_bridge.sender import next_backoff
-from mt5_bridge.sources import SyntheticSource, is_cash_market, previous_close, to_tick
+from mt5_bridge.sources import (
+    SyntheticSource,
+    is_storefront_symbol,
+    previous_close,
+    synthetic_description,
+    to_tick,
+)
 
 FIXED_NOW = datetime(2026, 11, 24, 13, 15, tzinfo=UTC)
 
@@ -88,12 +94,24 @@ def test_previous_close_is_unknown_without_history() -> None:
     assert previous_close([{"time": 20_000 * DAY, "close": 38.0}], TODAY_10H) is None
 
 
-def test_cash_market_filter_keeps_stocks_units_funds_and_etfs_only() -> None:
-    kept = ["PETR4", "VALE3", "SANB11", "MXRF11", "BOVA11", "CMIG4", "BRKM5", "TAEE11"]
-    dropped = ["PETR4F", "PETRL380", "WINZ26", "AAPL34", "MXRF12", "ITSA1", "BDOM", "WDO$"]
+def test_storefront_filter_keeps_cash_market_stocks_funds_etfs_and_bdrs() -> None:
+    cash = "BOVESPA\\A VISTA\\"
+    kept = ["PETR4", "VALE3", "SANB11", "MXRF11", "BOVA11", "BRKM5", "AAPL34", "A1AP34", "BACW39"]
+    dropped = ["PETR4F", "PETRL380", "ITSA1", "MXRF12", "BDOM"]
 
-    assert all(is_cash_market(s) for s in kept)
-    assert not any(is_cash_market(s) for s in dropped)
+    assert all(is_storefront_symbol(s, cash + s) for s in kept)
+    assert not any(is_storefront_symbol(s, cash + s) for s in dropped)
+
+
+def test_storefront_filter_drops_symbols_outside_cash_market() -> None:
+    assert not is_storefront_symbol("DI1F31", "BMF\\DI1F31")
+    assert not is_storefront_symbol("IBOV", "BOVESPA\\INDICES\\IBOV")
+
+
+def test_synthetic_descriptions_follow_b3_fixed_width() -> None:
+    assert synthetic_description("PETR4") == "PETROBRAS   PN      N2"
+    assert synthetic_description("XPTO11") == "XPTO11      CI"
+    assert synthetic_description("XPTO3") == "XPTO3       ON"
 
 
 def test_mt5_tick_converts_server_time_to_utc() -> None:
@@ -114,3 +132,4 @@ def test_synthetic_all_uses_built_in_symbols_with_previous_close() -> None:
 
     assert len(ticks) == len(source.symbols) > 10
     assert all(t.previous_close is not None for t in ticks)
+    assert {a.ticker for a in source.assets()} == set(source.symbols)

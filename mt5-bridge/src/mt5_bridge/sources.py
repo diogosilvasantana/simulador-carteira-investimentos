@@ -12,7 +12,7 @@ from datetime import UTC, datetime
 from decimal import ROUND_HALF_EVEN, Decimal
 from typing import Any, Protocol
 
-from mt5_bridge.protocol import Source, Tick
+from mt5_bridge.protocol import AssetInfo, Source, Tick
 
 log = logging.getLogger("mt5_bridge")
 
@@ -22,11 +22,31 @@ ALL = "ALL"
 
 # Ler o candle diário pode baixar histórico do servidor e levar centenas de ms por ativo. Limitar
 # por leitura evita travar a primeira passada do modo all, que tem centenas de ativos.
-HISTORY_LOADS_PER_POLL = 20
+HISTORY_LOADS_PER_POLL = 50
 
-# Ações (3 ON, 4 PN, 5 a 8 PNA a PND) e units, FIIs e ETFs (11). Ficam de fora opções, futuros,
-# fracionário (F), direitos e recibos (1, 2, 9, 10, 12, 13) e BDRs (31 a 39).
-CASH_MARKET = re.compile(r"^[A-Z]{4}(3|4|5|6|7|8|11)$")
+# Mercado à vista da vitrine: ações (3 a 8), units, FIIs, Fiagros e ETFs (11) e BDRs (31 a 39).
+# Ficam de fora opções, futuros, fracionário (F), direitos e recibos (1, 2, 9, 10, 12, 13).
+STOREFRONT = re.compile(r"^[A-Z0-9]{4}(3|4|5|6|7|8|11|31|32|33|34|35|39)$")
+CASH_MARKET_PATH = "BOVESPA\\A VISTA\\"
+
+# Descrições no formato da B3 para o modo sintético, como o MT5 da XP as mostra.
+SYNTHETIC_DESCRIPTIONS: Mapping[str, str] = {
+    "PETR4": "PETROBRAS   PN      N2",
+    "VALE3": "VALE        ON      NM",
+    "ITUB4": "ITAUUNIBANCOPN      N1",
+    "BBAS3": "BRASIL      ON      NM",
+    "BBDC4": "BRADESCO    PN      N1",
+    "ABEV3": "AMBEV S/A   ON",
+    "WEGE3": "WEG         ON      NM",
+    "B3SA3": "B3          ON      NM",
+    "RENT3": "LOCALIZA    ON      NM",
+    "SUZB3": "SUZANO S.A. ON      NM",
+    "MXRF11": "FII MAXI RENCI",
+    "HGLG11": "FII HGLG PAXCI",
+    "KNRI11": "FII KINEA   CI",
+    "BOVA11": "ISHARES BOVACI",
+    "IVVB11": "ISHARE SP500CI",
+}
 
 # Preços iniciais do modo sintético, só para os valores parecerem plausíveis.
 DEFAULT_PRICES: Mapping[str, Decimal] = {
@@ -54,7 +74,15 @@ class TickSource(Protocol):
     @property
     def symbols(self) -> list[str]: ...
 
+    def assets(self) -> list[AssetInfo]:
+        """Cadastro dos ativos acompanhados, enviado a cada conexão."""
+        ...
+
     def poll(self) -> list[Tick]: ...
+
+    def reset(self) -> None:
+        """Esquece o que já foi enviado, para a próxima leitura mandar tudo de novo."""
+        ...
 
     def close(self) -> None: ...
 
@@ -63,8 +91,17 @@ def to_price(value: float | Decimal) -> Decimal:
     return Decimal(str(value)).quantize(CENT, rounding=ROUND_HALF_EVEN)
 
 
-def is_cash_market(symbol: str) -> bool:
-    return CASH_MARKET.match(symbol) is not None
+def is_storefront_symbol(name: str, path: str) -> bool:
+    """Ativo do mercado à vista que entra na vitrine (o backend ainda classifica o tipo)."""
+    return path.startswith(CASH_MARKET_PATH) and STOREFRONT.match(name) is not None
+
+
+def synthetic_description(symbol: str) -> str:
+    known = SYNTHETIC_DESCRIPTIONS.get(symbol)
+    if known is not None:
+        return known
+    code = "CI" if symbol.endswith("11") else "DRN" if symbol.endswith("34") else "ON"
+    return f"{symbol:<12}{code}"
 
 
 class SyntheticSource:
@@ -99,6 +136,12 @@ class SyntheticSource:
     @property
     def symbols(self) -> list[str]:
         return list(self._prices)
+
+    def assets(self) -> list[AssetInfo]:
+        return [AssetInfo(s, synthetic_description(s)) for s in self._prices]
+
+    def reset(self) -> None:
+        pass
 
     def poll(self) -> list[Tick]:
         ticks: list[Tick] = []
@@ -139,14 +182,19 @@ class Mt5Source:
             raise RuntimeError(f"Falha ao conectar no MT5: {mt5.last_error()}")
         wanted = list(symbols)
         if wanted == [ALL]:
-            wanted = sorted(s.name for s in mt5.symbols_get() or () if is_cash_market(s.name))
+            wanted = sorted(
+                s.name for s in mt5.symbols_get() or () if is_storefront_symbol(s.name, s.path)
+            )
             log.info("Modo all: %d ativos à vista encontrados na corretora", len(wanted))
         self._symbols: list[str] = []
+        self._assets: list[AssetInfo] = []
         for symbol in wanted:
-            if mt5.symbol_info(symbol) is None or not mt5.symbol_select(symbol, True):
+            info = mt5.symbol_info(symbol)
+            if info is None or not mt5.symbol_select(symbol, True):
                 log.warning("Ativo indisponível na corretora, ignorado: %s", symbol)
                 continue
             self._symbols.append(symbol)
+            self._assets.append(AssetInfo(symbol, info.description or "", info.path or ""))
         if not self._symbols:
             raise RuntimeError("Nenhum dos ativos pedidos está disponível no MT5")
         self._offset_s = 3600 * (
@@ -161,6 +209,14 @@ class Mt5Source:
     @property
     def symbols(self) -> list[str]:
         return list(self._symbols)
+
+    def assets(self) -> list[AssetInfo]:
+        return list(self._assets)
+
+    def reset(self) -> None:
+        # O backend guarda as cotações em memória: depois de reiniciar, precisa receber o último
+        # tick de cada ativo, mesmo dos que não negociaram de novo.
+        self._last_sent.clear()
 
     def _detect_offset(self) -> int:
         """O MT5 informa horários no relógio do servidor da corretora, não em UTC.

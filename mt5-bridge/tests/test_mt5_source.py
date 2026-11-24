@@ -26,10 +26,13 @@ class FakeMt5:
         pass
 
     def symbols_get(self) -> list[Any]:
-        return [SimpleNamespace(name=n) for n in [*self.names, "PETR4F", "WINZ26"]]
+        cash = [self.symbol_info(n) for n in [*self.names, "PETR4F"]]
+        return [*cash, SimpleNamespace(name="DI1F31", path="BMF\\DI1F31", description="DI")]
 
     def symbol_info(self, symbol: str) -> Any:
-        return SimpleNamespace(name=symbol)
+        return SimpleNamespace(
+            name=symbol, path=f"BOVESPA\\A VISTA\\{symbol}", description=f"{symbol:<12}ON"
+        )
 
     def symbol_select(self, symbol: str, enable: bool) -> bool:
         return True
@@ -46,15 +49,35 @@ class FakeMt5:
 
 @pytest.fixture
 def fake_mt5(monkeypatch: pytest.MonkeyPatch) -> FakeMt5:
-    fake = FakeMt5([f"AB{chr(65 + i // 26)}{chr(65 + i % 26)}3" for i in range(30)])
+    fake = FakeMt5([f"AB{chr(65 + i // 26)}{chr(65 + i % 26)}3" for i in range(70)])
     monkeypatch.setitem(sys.modules, "MetaTrader5", fake)
     return fake
 
 
-def test_all_mode_keeps_only_cash_market_symbols(fake_mt5: FakeMt5) -> None:
+def test_all_mode_keeps_only_storefront_symbols(fake_mt5: FakeMt5) -> None:
     source = Mt5Source(["ALL"], server_utc_offset_h=-3)
 
     assert source.symbols == sorted(fake_mt5.names)
+
+
+def test_assets_carry_mt5_description_and_path(fake_mt5: FakeMt5) -> None:
+    source = Mt5Source(["ABAA3"], server_utc_offset_h=-3)
+
+    (asset,) = source.assets()
+
+    assert asset.ticker == "ABAA3"
+    assert asset.description == "ABAA3       ON"
+    assert asset.path == "BOVESPA\\A VISTA\\ABAA3"
+
+
+def test_reset_resends_unchanged_ticks_after_reconnect(fake_mt5: FakeMt5) -> None:
+    source = Mt5Source(["ABAA3"], server_utc_offset_h=-3)
+    source.poll()
+    source.poll()
+
+    source.reset()
+
+    assert len(source.poll()) == 1
 
 
 def test_first_poll_limits_history_loads_and_resends_once_close_is_known(
@@ -66,9 +89,9 @@ def test_first_poll_limits_history_loads_and_resends_once_close_is_known(
     second = source.poll()
     third = source.poll()
 
-    assert len(first) == 30
+    assert len(first) == 70
     assert sum(t.previous_close is not None for t in first) == HISTORY_LOADS_PER_POLL
-    assert len(second) == 30 - HISTORY_LOADS_PER_POLL
+    assert len(second) == 70 - HISTORY_LOADS_PER_POLL
     assert all(t.previous_close is not None for t in second)
     assert third == []
-    assert fake_mt5.history_loads == 30
+    assert fake_mt5.history_loads == 70

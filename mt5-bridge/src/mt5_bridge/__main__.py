@@ -17,7 +17,7 @@ import sys
 from mt5_bridge.config import BridgeConfig
 from mt5_bridge.protocol import Source
 from mt5_bridge.sender import run
-from mt5_bridge.sources import Mt5Source, SyntheticSource, TickSource
+from mt5_bridge.sources import ALL, Mt5Source, SyntheticSource, TickSource
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -35,6 +35,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "recente, o que só funciona com o mercado aberto",
     )
     parser.add_argument("--url", help="Endpoint de ingestão (sobrepõe BRIDGE_INGEST_URL)")
+    parser.add_argument(
+        "--interval-ms",
+        type=int,
+        help="Intervalo entre leituras (sobrepõe BRIDGE_POLL_INTERVAL_MS). Padrão: 250 ms, ou "
+        "1000 ms com --symbols all",
+    )
     parser.add_argument("--seed", type=int, default=42, help="Semente do modo sintético")
     parser.add_argument(
         "--volatility",
@@ -59,6 +65,11 @@ def main(argv: list[str] | None = None) -> None:
         env["BRIDGE_INGEST_URL"] = args.url
     if args.symbols:
         env["BRIDGE_SYMBOLS"] = args.symbols
+    if args.interval_ms:
+        env["BRIDGE_POLL_INTERVAL_MS"] = str(args.interval_ms)
+    elif env.get("BRIDGE_SYMBOLS", "").strip().upper() == ALL:
+        # Ler ~2.500 ativos a cada 250 ms ocupa a CPU à toa; 1 s basta para uma lista.
+        env.setdefault("BRIDGE_POLL_INTERVAL_MS", "1000")
     try:
         config = BridgeConfig.from_env(env)
     except ValueError as error:

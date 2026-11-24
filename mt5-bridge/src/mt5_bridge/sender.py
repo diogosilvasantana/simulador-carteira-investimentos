@@ -34,6 +34,10 @@ async def run(config: BridgeConfig, source: TickSource, source_kind: Source) -> 
             ) as websocket:
                 log.info("Conectado a %s", config.ingest_url)
                 backoff = 1.0
+                for asset in source.assets():
+                    await websocket.send(asset.to_json())
+                log.info("Cadastro de %d ativos enviado", len(source.assets()))
+                source.reset()
                 last_heartbeat = 0.0
                 loop = asyncio.get_running_loop()
                 while True:
