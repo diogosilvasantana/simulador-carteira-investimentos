@@ -69,7 +69,8 @@ class RealtimeQuotesIntegrationTest {
     Map<String, Object> quote =
         Objects.requireNonNull(received.poll(5, TimeUnit.SECONDS), "nenhuma cotação recebida");
     assertThat(quote).containsEntry("ticker", "PETR4").containsEntry("source", "LIVE");
-    assertThat(quote.get("last")).hasToString("38.47");
+    // Texto, não número: o navegador não pode converter preço para ponto flutuante.
+    assertThat(quote).containsEntry("last", "38.47").containsEntry("bid", "38.46");
   }
 
   @Test
