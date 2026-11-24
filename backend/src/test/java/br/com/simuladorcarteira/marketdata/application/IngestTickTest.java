@@ -56,6 +56,26 @@ class IngestTickTest {
   }
 
   @Test
+  void shouldAcceptTickWithSameTimeThatAddsPreviousClose() {
+    ingestTick.ingest(tick("38.47", NOW));
+    Tick withPreviousClose =
+        new Tick(
+            Ticker.of("PETR4"),
+            Money.brl("38.47"),
+            null,
+            null,
+            Money.brl("37.00"),
+            100,
+            NOW,
+            TickSource.LIVE);
+
+    boolean accepted = ingestTick.ingest(withPreviousClose);
+
+    assertThat(accepted).isTrue();
+    assertThat(quotes.findByTicker(Ticker.of("PETR4"))).contains(withPreviousClose);
+  }
+
+  @Test
   void shouldListQuotesSortedByTicker() {
     ingestTick.ingest(tickFor("VALE3", NOW));
     ingestTick.ingest(tickFor("BOVA11", NOW));
