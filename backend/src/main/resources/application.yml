@@ -14,3 +14,10 @@ management:
     health:
       probes:
         enabled: true
+
+simulador:
+  ingest:
+    # Segredo da ponte MT5 / simulador de pregão. Vazio = ingestão desligada.
+    token: ${INGEST_TOKEN:}
+  realtime:
+    allowed-origins: ${ALLOWED_ORIGINS:http://localhost:4200}
