@@ -37,7 +37,9 @@ async def run(config: BridgeConfig, source: TickSource, source_kind: Source) -> 
                 last_heartbeat = 0.0
                 loop = asyncio.get_running_loop()
                 while True:
-                    for tick in source.poll():
+                    # A leitura do MT5 bloqueia; numa thread, o WebSocket continua respondendo aos
+                    # pings e a conexão não cai enquanto centenas de ativos são lidos.
+                    for tick in await asyncio.to_thread(source.poll):
                         await websocket.send(tick.to_json())
                         log.debug("%s %s", tick.ticker, tick.last)
                     now = loop.time()

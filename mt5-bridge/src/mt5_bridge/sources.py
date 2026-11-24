@@ -20,6 +20,10 @@ CENT = Decimal("0.01")
 SECONDS_PER_DAY = 86_400
 ALL = "ALL"
 
+# Ler o candle diário pode baixar histórico do servidor e levar centenas de ms por ativo. Limitar
+# por leitura evita travar a primeira passada do modo all, que tem centenas de ativos.
+HISTORY_LOADS_PER_POLL = 20
+
 # Ações (3 ON, 4 PN, 5 a 8 PNA a PND) e units, FIIs e ETFs (11). Ficam de fora opções, futuros,
 # fracionário (F), direitos e recibos (1, 2, 9, 10, 12, 13) e BDRs (31 a 39).
 CASH_MARKET = re.compile(r"^[A-Z]{4}(3|4|5|6|7|8|11)$")
@@ -148,7 +152,9 @@ class Mt5Source:
         self._offset_s = 3600 * (
             server_utc_offset_h if server_utc_offset_h is not None else self._detect_offset()
         )
-        self._last_time_msc: dict[str, int] = {}
+        # Chave do último tick enviado: horário e se já tinha fechamento anterior. Quando o
+        # fechamento chega depois, o mesmo negócio é reenviado com a variação.
+        self._last_sent: dict[str, tuple[int, bool]] = {}
         self._previous_close: dict[str, tuple[int, Decimal | None]] = {}
         self._slow_poll_warned = False
 
@@ -180,17 +186,18 @@ class Mt5Source:
     def poll(self) -> list[Tick]:
         started = time.perf_counter()
         ticks: list[Tick] = []
+        budget = HISTORY_LOADS_PER_POLL
         for symbol in self._symbols:
             raw = self._mt5.symbol_info_tick(symbol)
-            if raw is None or raw.time_msc == self._last_time_msc.get(symbol):
+            if raw is None:
                 continue
-            self._last_time_msc[symbol] = raw.time_msc
-            tick = to_tick(
-                symbol,
-                raw,
-                previous_close=self._previous_close_for(symbol, raw.time),
-                offset_s=self._offset_s,
-            )
+            close, loaded = self._previous_close_for(symbol, raw.time, load=budget > 0)
+            budget -= loaded
+            key = (raw.time_msc, close is not None)
+            if key == self._last_sent.get(symbol):
+                continue
+            self._last_sent[symbol] = key
+            tick = to_tick(symbol, raw, previous_close=close, offset_s=self._offset_s)
             if tick is not None:
                 ticks.append(tick)
         elapsed_ms = (time.perf_counter() - started) * 1000
@@ -199,15 +206,20 @@ class Mt5Source:
             self._slow_poll_warned = True
         return ticks
 
-    def _previous_close_for(self, symbol: str, server_time_s: int) -> Decimal | None:
+    def _previous_close_for(
+        self, symbol: str, server_time_s: int, *, load: bool
+    ) -> tuple[Decimal | None, int]:
+        """Devolve o fechamento anterior e quantos candles foram lidos agora (0 ou 1)."""
         day = server_time_s // SECONDS_PER_DAY
         cached = self._previous_close.get(symbol)
         if cached is not None and cached[0] == day:
-            return cached[1]
+            return cached[1], 0
+        if not load:
+            return None, 0
         rates = self._mt5.copy_rates_from_pos(symbol, self._mt5.TIMEFRAME_D1, 0, 3)
         value = previous_close(rates, server_time_s)
         self._previous_close[symbol] = (day, value)
-        return value
+        return value, 1
 
     def close(self) -> None:
         self._mt5.shutdown()

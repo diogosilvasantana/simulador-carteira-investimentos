@@ -17,10 +17,13 @@ public class IngestTick {
 
   /**
    * Retorna {@code false} quando o tick é mais antigo que a cotação guardada e foi descartado.
+   *
+   * <p>Um tick com o mesmo horário é aceito: a ponte reenvia o último negócio quando descobre o
+   * fechamento anterior depois, e a cotação precisa ganhar a variação.
    */
   public boolean ingest(Tick tick) {
     boolean stale =
-        quotes.findByTicker(tick.ticker()).map(current -> !tick.isNewerThan(current)).orElse(false);
+        quotes.findByTicker(tick.ticker()).map(current -> current.isNewerThan(tick)).orElse(false);
     if (stale) {
       return false;
     }
