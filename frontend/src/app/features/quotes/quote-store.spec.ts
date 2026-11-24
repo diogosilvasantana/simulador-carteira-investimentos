@@ -3,7 +3,17 @@ import { Quote, compareDecimal } from './quote';
 import { QuoteStore } from './quote-store';
 
 function quote(ticker: string, last: string, occurredAt = '2026-11-24T13:00:00Z'): Quote {
-  return { ticker, last, bid: null, ask: null, volume: 100, occurredAt, source: 'SYNTHETIC' };
+  return {
+    ticker,
+    last,
+    bid: null,
+    ask: null,
+    previousClose: null,
+    changePercent: null,
+    volume: 100,
+    occurredAt,
+    source: 'SYNTHETIC',
+  };
 }
 
 describe('QuoteStore', () => {
@@ -26,6 +36,19 @@ describe('QuoteStore', () => {
 
     store.apply(quote('PETR4', '38.49', '2026-11-24T13:00:02Z'));
     expect(store.rows()[0].direction).toBe('down');
+  });
+
+  it('should apply a batch keeping the newest tick of each ticker', () => {
+    store.applyAll([
+      quote('PETR4', '38.50', '2026-11-24T13:00:00Z'),
+      quote('VALE3', '61.20', '2026-11-24T13:00:00Z'),
+      quote('PETR4', '38.60', '2026-11-24T13:00:01Z'),
+    ]);
+
+    expect(store.rows().map((r) => [r.quote.ticker, r.quote.last, r.direction])).toEqual([
+      ['PETR4', '38.60', 'up'],
+      ['VALE3', '61.20', 'flat'],
+    ]);
   });
 
   it('should ignore a tick older than the current one', () => {

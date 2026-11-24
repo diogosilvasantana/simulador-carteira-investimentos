@@ -1,7 +1,60 @@
 .quotes__header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 1rem;
+}
+
+.count {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.search {
+  margin-left: auto;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  min-width: 12rem;
+}
+
+.sort {
+  all: unset;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+[aria-sort='ascending'] .sort::after {
+  content: ' ▲';
+}
+
+[aria-sort='descending'] .sort::after {
+  content: ' ▼';
+}
+
+.change {
+  font-weight: 500;
+
+  &--up {
+    color: var(--gain);
+  }
+
+  &--down {
+    color: var(--loss);
+  }
+}
+
+thead {
+  position: sticky;
+  top: 0;
+  background: var(--background);
 }
 
 .status {

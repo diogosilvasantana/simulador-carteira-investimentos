@@ -24,6 +24,8 @@ Use sempre estes nomes no código. Se um conceito novo surgir, adicione-o aqui e
 | Posição | `Position` |
 | Preço médio | `averagePrice` |
 | Resultado realizado / não realizado | `realizedPnl` / `unrealizedPnl` |
+| Fechamento anterior | `previousClose` |
+| Variação (%) | `changePercent` |
 | Caixa | `cash` |
 | Aporte | `Contribution` |
 | Provento | `CorporateAction` |

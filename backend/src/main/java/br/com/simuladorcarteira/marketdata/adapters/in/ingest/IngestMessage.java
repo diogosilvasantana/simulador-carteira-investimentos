@@ -12,6 +12,7 @@ record IngestMessage(
     @Nullable String last,
     @Nullable String bid,
     @Nullable String ask,
+    @JsonProperty("previous_close") @Nullable String previousClose,
     long volume,
     @JsonProperty("occurred_at") @Nullable String occurredAt,
     @Nullable String source) {}
