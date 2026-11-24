@@ -50,7 +50,7 @@ jobs:
           echo "Última versão: $latest → nova versão: v$version"
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "25"
