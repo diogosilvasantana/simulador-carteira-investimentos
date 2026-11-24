@@ -1,10 +1,11 @@
-# Build
-FROM maven:3.9-eclipse-temurin-25 AS build
+# Build com o Maven Wrapper (mesma versão do Maven da CI e dos desenvolvedores)
+FROM eclipse-temurin:25-jdk AS build
 WORKDIR /workspace
-COPY pom.xml .
-RUN mvn -B -q dependency:go-offline
+COPY mvnw pom.xml ./
+COPY .mvn .mvn
+RUN ./mvnw -B -q dependency:go-offline
 COPY src ./src
-RUN mvn -B -q package -DskipTests -Dspotless.check.skip=true -Djacoco.skip=true \
+RUN ./mvnw -B -q package -DskipTests -Dspotless.check.skip=true -Djacoco.skip=true \
     && java -Djarmode=tools -jar target/*.jar extract --layers --launcher --destination target/extracted
 
 # Runtime

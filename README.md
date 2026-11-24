@@ -53,11 +53,11 @@ Documentação completa em [`docs/architecture`](docs/architecture/README.md) e 
 
 ## Como rodar localmente
 
-Pré-requisitos: JDK 25, Maven 3.9+, Node 22+, Docker.
+Pré-requisitos: JDK 25, Node 22+, Docker. O Maven vem pelo wrapper (`./mvnw`).
 
 ```bash
 # backend
-cd backend && mvn spring-boot:run
+cd backend && ./mvnw spring-boot:run
 
 # frontend
 cd frontend && npm ci && npm start

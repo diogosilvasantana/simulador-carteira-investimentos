@@ -103,7 +103,7 @@ versão de patch é publicada e o back-merge para a `develop` é aberto sozinho.
 ## Verificações locais
 
 ```bash
-cd backend && mvn verify                       # testes, arquitetura, formatação, cobertura
+cd backend && ./mvnw verify                       # testes, arquitetura, formatação, cobertura
 cd frontend && npm run lint && npm test -- --watch=false && npm run build
 cd mt5-bridge && ruff check . && ruff format --check . && mypy . && pytest
 ```

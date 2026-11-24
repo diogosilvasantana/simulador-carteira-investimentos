@@ -63,7 +63,7 @@ jobs:
         env:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
-          mvn -B -q -f backend/pom.xml versions:set -DnewVersion="$VERSION" -DgenerateBackupPoms=false
+          (cd backend && ./mvnw -B -q versions:set -DnewVersion="$VERSION" -DgenerateBackupPoms=false)
           (cd frontend && npm version "$VERSION" --no-git-tag-version --allow-same-version)
           sed -i "s/^version = \".*\"/version = \"$VERSION\"/" mt5-bridge/pyproject.toml
 

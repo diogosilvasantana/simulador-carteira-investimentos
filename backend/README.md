@@ -20,16 +20,19 @@ Cada módulo segue a estrutura hexagonal: `domain`, `application`, `adapters/in`
 ## Comandos
 
 ```bash
-mvn verify            # testes, regras de arquitetura, formatação e cobertura
-mvn spotless:apply    # formata o código
-mvn spring-boot:run   # sobe em http://localhost:8080 (health em /actuator/health)
+./mvnw verify          # testes, regras de arquitetura, formatação e cobertura
+./mvnw spotless:apply  # formata o código
+./mvnw spring-boot:run # sobe em http://localhost:8080 (health em /actuator/health)
 ```
 
-`mvn verify` também gera os diagramas dos módulos em `target/spring-modulith-docs`.
+`./mvnw verify` também gera os diagramas dos módulos em `target/spring-modulith-docs`.
 
 ## O que quebra o build
 
 - `ModularityTests`: um módulo usando tipos internos de outro, ou ciclo entre módulos
-- `ArchitectureTests`: domínio dependendo de Spring/JPA, injeção por campo, dinheiro em `double`
+- `ArchitectureTests`: domínio dependendo de Spring/JPA, injeção por campo, dinheiro em `double`,
+  pacote sem `package-info.java` com `@NullMarked`
+- Error Prone: erros comuns de Java detectados na compilação
+- NullAway: possível `null` em código de pacote `@NullMarked` (todos os pacotes do projeto)
 - Spotless: código fora do google-java-format
 - JaCoCo: cobertura de linhas abaixo de 80% em `shared` e nos pacotes `domain`
