@@ -14,6 +14,24 @@
 .brand {
   font-weight: 600;
   font-size: 1.125rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.nav {
+  display: flex;
+  gap: 1rem;
+  margin-left: 1rem;
+
+  a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .nav__active {
+    color: var(--text);
+    font-weight: 500;
+  }
 }
 
 .badge {
