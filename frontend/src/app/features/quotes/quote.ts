@@ -4,6 +4,9 @@ export interface Quote {
   readonly last: string;
   readonly bid: string | null;
   readonly ask: string | null;
+  readonly previousClose: string | null;
+  /** Em pontos percentuais sobre o fechamento anterior: "1.25" é alta de 1,25%. */
+  readonly changePercent: string | null;
   readonly volume: number;
   readonly occurredAt: string;
   readonly source: 'LIVE' | 'REPLAY' | 'SYNTHETIC';
