@@ -21,3 +21,5 @@ simulador:
     token: ${INGEST_TOKEN:}
   realtime:
     allowed-origins: ${ALLOWED_ORIGINS:http://localhost:4200}
+    # Intervalo dos lotes de cotações para o navegador (ADR-010)
+    flush-interval-ms: 500

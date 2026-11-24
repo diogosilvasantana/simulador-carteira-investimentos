@@ -1,5 +1,6 @@
 package br.com.simuladorcarteira.marketdata.application;
 
+import br.com.simuladorcarteira.marketdata.domain.AssetQuote;
 import br.com.simuladorcarteira.marketdata.domain.Tick;
 import org.springframework.stereotype.Service;
 
@@ -8,10 +9,13 @@ import org.springframework.stereotype.Service;
 public class IngestTick {
 
   private final LatestQuoteRepository quotes;
+  private final AssetRepository assets;
   private final QuoteBroadcaster broadcaster;
 
-  public IngestTick(LatestQuoteRepository quotes, QuoteBroadcaster broadcaster) {
+  public IngestTick(
+      LatestQuoteRepository quotes, AssetRepository assets, QuoteBroadcaster broadcaster) {
     this.quotes = quotes;
+    this.assets = assets;
     this.broadcaster = broadcaster;
   }
 
@@ -28,7 +32,8 @@ public class IngestTick {
       return false;
     }
     quotes.save(tick);
-    broadcaster.broadcast(tick);
+    broadcaster.broadcast(
+        new AssetQuote(tick.ticker(), assets.findByTicker(tick.ticker()).orElse(null), tick));
     return true;
   }
 }

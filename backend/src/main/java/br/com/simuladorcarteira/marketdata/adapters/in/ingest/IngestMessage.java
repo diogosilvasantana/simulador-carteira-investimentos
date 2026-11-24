@@ -9,6 +9,7 @@ import org.jspecify.annotations.Nullable;
 record IngestMessage(
     @Nullable String type,
     @Nullable String ticker,
+    @Nullable String description,
     @Nullable String last,
     @Nullable String bid,
     @Nullable String ask,
