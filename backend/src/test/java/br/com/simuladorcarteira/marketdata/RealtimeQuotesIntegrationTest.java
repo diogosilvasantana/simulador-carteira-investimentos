@@ -38,7 +38,7 @@ class RealtimeQuotesIntegrationTest {
   private static final String TICK =
       """
       {"type":"tick","ticker":"PETR4","last":"38.47","bid":"38.46","ask":"38.48",\
-      "volume":1200,"occurred_at":"2026-11-24T13:15:00+00:00","source":"LIVE"}\
+      "previous_close":"37.00","volume":1200,"occurred_at":"2026-11-24T13:15:00+00:00","source":"LIVE"}\
       """;
 
   @LocalServerPort private int port;
@@ -71,6 +71,9 @@ class RealtimeQuotesIntegrationTest {
     assertThat(quote).containsEntry("ticker", "PETR4").containsEntry("source", "LIVE");
     // Texto, não número: o navegador não pode converter preço para ponto flutuante.
     assertThat(quote).containsEntry("last", "38.47").containsEntry("bid", "38.46");
+    assertThat(quote)
+        .containsEntry("previousClose", "37.00")
+        .containsEntry("changePercent", "3.97");
   }
 
   @Test
