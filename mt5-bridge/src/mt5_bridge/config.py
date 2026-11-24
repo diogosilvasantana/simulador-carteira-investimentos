@@ -9,6 +9,8 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True, slots=True)
 class BridgeConfig:
+    """Configuração da ponte. ``symbols == ("ALL",)`` pede todos os ativos à vista da corretora."""
+
     ingest_url: str
     ingest_token: str
     symbols: tuple[str, ...]

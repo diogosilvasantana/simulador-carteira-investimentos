@@ -36,6 +36,13 @@ def test_tick_without_bid_and_ask_serializes_nulls() -> None:
 
     assert payload["bid"] is None
     assert payload["ask"] is None
+    assert payload["previous_close"] is None
+
+
+def test_tick_serializes_previous_close_as_string() -> None:
+    payload = json.loads(make_tick(previous_close=Decimal("37.00")).to_json())
+
+    assert payload["previous_close"] == "37.00"
 
 
 @pytest.mark.parametrize("last", [Decimal("0"), Decimal("-1")])
