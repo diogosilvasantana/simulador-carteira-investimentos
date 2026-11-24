@@ -45,7 +45,7 @@ class Tick:
         payload["last"] = str(self.last)
         payload["bid"] = None if self.bid is None else str(self.bid)
         payload["ask"] = None if self.ask is None else str(self.ask)
-        payload["occurred_at"] = self.occurred_at.astimezone(UTC).isoformat()
+        payload["occurred_at"] = to_instant(self.occurred_at)
         payload["source"] = self.source.value
         return json.dumps(payload, separators=(",", ":"))
 
@@ -61,8 +61,13 @@ class Heartbeat:
         return json.dumps(
             {
                 "type": "heartbeat",
-                "sent_at": self.sent_at.astimezone(UTC).isoformat(),
+                "sent_at": to_instant(self.sent_at),
                 "source": self.source.value,
             },
             separators=(",", ":"),
         )
+
+
+def to_instant(moment: datetime) -> str:
+    """ISO-8601 em UTC com sufixo Z, o formato que o Instant.parse do Java lê."""
+    return moment.astimezone(UTC).isoformat().replace("+00:00", "Z")

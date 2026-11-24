@@ -32,3 +32,13 @@ ruff check . && ruff format --check . && mypy . && pytest
 | `BRIDGE_INGEST_TOKEN` | token gerado no backend |
 | `BRIDGE_SYMBOLS` | `PETR4,VALE3,MXRF11` |
 | `BRIDGE_POLL_INTERVAL_MS` | `250` |
+
+## Rodar a ponte
+
+```powershell
+$env:BRIDGE_INGEST_TOKEN = "local-dev-token"
+python -m mt5_bridge --source mt5 --symbols PETR4,VALE3      # MT5 aberto e logado
+python -m mt5_bridge --source synthetic --symbols PETR4 --seed 7   # mercado fechado
+```
+
+Passo a passo completo no Windows: [docs/guias/rodar-local-windows.md](../docs/guias/rodar-local-windows.md).

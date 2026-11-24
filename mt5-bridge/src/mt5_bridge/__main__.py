@@ -26,6 +26,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--symbols", help="Lista separada por vírgula (sobrepõe BRIDGE_SYMBOLS)")
     parser.add_argument("--url", help="Endpoint de ingestão (sobrepõe BRIDGE_INGEST_URL)")
     parser.add_argument("--seed", type=int, default=42, help="Semente do modo sintético")
+    parser.add_argument(
+        "--volatility",
+        type=float,
+        default=2.0,
+        help="Volatilidade anual do modo sintético. O padrão é exagerado para os preços "
+        "mudarem a cada poucos segundos; 0.3 é o realista",
+    )
     parser.add_argument("--verbose", action="store_true", help="Mostra cada tick enviado")
     return parser.parse_args(argv)
 
@@ -53,7 +60,10 @@ def main(argv: list[str] | None = None) -> None:
         kind = Source.LIVE
     else:
         source = SyntheticSource(
-            config.symbols, seed=args.seed, interval_ms=config.poll_interval_ms
+            config.symbols,
+            seed=args.seed,
+            annual_volatility=args.volatility,
+            interval_ms=config.poll_interval_ms,
         )
         kind = Source.SYNTHETIC
 
