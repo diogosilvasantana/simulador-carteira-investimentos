@@ -30,3 +30,4 @@ mt5-bridge/*.csv
 .env
 .env.*
 !.env.example
+*.egg-info/
