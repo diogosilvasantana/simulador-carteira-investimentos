@@ -27,7 +27,7 @@ def test_tick_serializes_prices_as_strings_and_time_in_utc() -> None:
 
     assert payload["type"] == "tick"
     assert payload["last"] == "38.47"
-    assert payload["occurred_at"] == "2026-11-23T13:15:00+00:00"
+    assert payload["occurred_at"] == "2026-11-23T13:15:00Z"
     assert payload["source"] == "LIVE"
 
 
@@ -54,6 +54,6 @@ def test_heartbeat_carries_source() -> None:
 
     assert json.loads(beat.to_json()) == {
         "type": "heartbeat",
-        "sent_at": "2026-11-23T00:00:00+00:00",
+        "sent_at": "2026-11-23T00:00:00Z",
         "source": "SYNTHETIC",
     }

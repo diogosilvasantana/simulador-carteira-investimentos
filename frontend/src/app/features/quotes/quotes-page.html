@@ -1,0 +1,45 @@
+<section class="quotes">
+  <header class="quotes__header">
+    <h1>Cotações</h1>
+    <span class="status" [class]="'status status--' + stream.state()">
+      {{ stateLabel[stream.state()] }}
+    </span>
+  </header>
+
+  @if (store.rows().length === 0) {
+    <p class="empty">
+      Nenhuma cotação ainda. Inicie a ponte do MT5 ou o modo sintético para ver os preços aqui.
+    </p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Ativo</th>
+          <th scope="col" class="num">Último</th>
+          <th scope="col" class="num">Compra</th>
+          <th scope="col" class="num">Venda</th>
+          <th scope="col" class="num">Volume</th>
+          <th scope="col">Horário</th>
+          <th scope="col">Fonte</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of store.rows(); track row.quote.ticker) {
+          <tr>
+            <th scope="row">{{ row.quote.ticker }}</th>
+            @for (revision of [row.revision]; track revision) {
+              <td class="num last" [class]="'num last last--' + row.direction">
+                {{ formatPrice(row.quote.last) }}
+              </td>
+            }
+            <td class="num">{{ formatPrice(row.quote.bid) }}</td>
+            <td class="num">{{ formatPrice(row.quote.ask) }}</td>
+            <td class="num">{{ row.quote.volume }}</td>
+            <td>{{ row.quote.occurredAt | date: 'HH:mm:ss' }}</td>
+            <td>{{ sourceLabel[row.quote.source] }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</section>

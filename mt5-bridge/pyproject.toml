@@ -3,12 +3,15 @@ name = "mt5-bridge"
 version = "0.1.0"
 description = "Ponte entre o MetaTrader 5 e o backend do simulador de carteira"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = ["websockets>=14"]
 
 [project.optional-dependencies]
 # Só instalável no Windows, onde roda o terminal MT5
 mt5 = ["MetaTrader5"]
 dev = ["pytest>=8", "ruff>=0.8", "mypy>=1.13"]
+
+[project.scripts]
+mt5-bridge = "mt5_bridge.__main__:main"
 
 [build-system]
 requires = ["setuptools>=75"]

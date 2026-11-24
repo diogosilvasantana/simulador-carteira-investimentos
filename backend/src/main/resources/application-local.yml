@@ -1,0 +1,8 @@
+# Perfil para rodar tudo no PC: ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+simulador:
+  ingest:
+    token: ${INGEST_TOKEN:local-dev-token}
+
+logging:
+  level:
+    br.com.simuladorcarteira.marketdata: DEBUG
