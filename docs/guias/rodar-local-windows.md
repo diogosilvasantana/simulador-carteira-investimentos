@@ -67,15 +67,17 @@ Com a bolsa aberta os preços começam a piscar em verde e vermelho na tela. A c
 
 ### Todos os ativos
 
-Troque a lista por `all` para acompanhar todas as ações, units, FIIs e ETFs da corretora (ficam de
-fora opções, futuros, fracionário e BDRs):
+Troque a lista por `all` para acompanhar todo o mercado à vista da corretora: ações, units, FIIs,
+Fiagros, ETFs e BDRs (ficam de fora opções, futuros e fracionário):
 
 ```powershell
 .venv\Scripts\python -m mt5_bridge --source mt5 --symbols all
 ```
 
-A ponte adiciona esses ativos à Observação do Mercado do MT5. A variação em % é calculada sobre o
-fechamento do pregão anterior, lido do candle diário.
+A ponte manda o cadastro de cada ativo ao conectar e lê o mercado a cada 1 s (`--interval-ms`
+muda isso). Em <http://localhost:4200/cotacoes> cada categoria tem a sua aba, e a tela só carrega e
+atualiza a aba aberta. A variação em % é calculada sobre o fechamento do pregão anterior, lido do
+candle diário: nos primeiros segundos ela aparece aos poucos, 50 ativos por leitura.
 
 ### Horário errado na tela
 
