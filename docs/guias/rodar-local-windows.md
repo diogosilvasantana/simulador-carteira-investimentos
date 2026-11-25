@@ -11,6 +11,22 @@ flowchart LR
 
 A ponte só lê cotações. Ela nunca envia ordens ao MT5.
 
+## Tudo de uma vez
+
+Com os pré-requisitos instalados (seção 1), na raiz do projeto:
+
+```powershell
+.\dev.cmd                          # MT5 aberto e logado, todos os ativos
+.\dev.cmd -Source synthetic        # mercado fechado
+.\dev.cmd -Symbols PETR4,VALE3     # só alguns ativos
+.\dev.cmd -Stop                    # encerra tudo
+```
+
+O comando confere Java e Node, escolhe uma porta livre para o backend (se a 8080 estiver com o
+Apache, usa a 8081), espera o backend subir, liga o frontend apontando para essa porta, prepara o
+ambiente Python da ponte e abre <http://localhost:4200/cotacoes>. Cada parte fica na sua janela,
+para ver os logs. As seções abaixo mostram o passo a passo manual.
+
 ## 1. Pré-requisitos (uma vez só)
 
 No PowerShell:
@@ -104,5 +120,5 @@ A mesma semente sempre gera a mesma sequência de preços.
 | `Conexão perdida (HTTP 401)` | Token da ponte diferente do backend; confira `BRIDGE_INGEST_TOKEN` |
 | `Conexão perdida` repetindo | Backend ainda subindo ou parado; a ponte reconecta sozinha |
 | Selo **Conectando…** no navegador | Backend parado ou o `npm start` sem o proxy |
-| Porta 8080 ocupada (Apache, XAMPP, outro projeto) | Suba o backend com `"-Dspring-boot.run.arguments=--server.port=8081"`, troque `8080` por `8081` no `frontend/proxy.conf.json` e passe `--url ws://localhost:8081/ingest` à ponte |
+| Porta 8080 ocupada (Apache, XAMPP, outro projeto) | Use o `dev.cmd`, que escolhe outra porta sozinho. No manual: `"-Dspring-boot.run.arguments=--server.port=8081"` no backend, `$env:BACKEND_PORT = '8081'` antes do `npm start` e `--url ws://localhost:8081/ingest` na ponte |
 | Preços parados com a bolsa aberta | Pré-abertura ou leilão; a ponte usa a melhor oferta de compra até sair negócio |
