@@ -30,6 +30,30 @@ public final class Portfolio {
   private final List<Execution> executions = new ArrayList<>();
   private long sequence;
 
+  /** Reconstrói a carteira gravada, sem repetir as regras que já valeram quando ela mudou. */
+  public static Portfolio restore(PortfolioState state) {
+    Portfolio portfolio = new Portfolio();
+    portfolio.cash = state.cash();
+    portfolio.contributed = state.contributed();
+    portfolio.sequence = state.lastId();
+    state.positions().forEach(p -> portfolio.positions.put(p.ticker(), p));
+    portfolio.fixedIncome.addAll(state.fixedIncome());
+    portfolio.contributions.addAll(state.contributions());
+    portfolio.executions.addAll(state.executions());
+    return portfolio;
+  }
+
+  public PortfolioState state() {
+    return new PortfolioState(
+        cash,
+        contributed,
+        sequence,
+        List.copyOf(positions.values()),
+        fixedIncome,
+        contributions,
+        executions);
+  }
+
   public Money cash() {
     return cash;
   }

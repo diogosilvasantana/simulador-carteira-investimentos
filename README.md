@@ -67,7 +67,7 @@ janela, e abre o navegador ([guia completo](docs/guias/rodar-local-windows.md)):
 Cada parte separada:
 
 ```bash
-# backend sem banco (perfil local; o padrão exige PostgreSQL via SPRING_DATASOURCE_URL)
+# backend no PC (perfil local, banco H2 em backend/data/; o padrão exige PostgreSQL via SPRING_DATASOURCE_URL)
 cd backend && ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 
 # frontend

@@ -141,4 +141,31 @@ class PortfolioTest {
                     "cdb-110", "CDB", Money.brl("600.00"), new BigDecimal("110"), false, NOW))
         .isInstanceOf(InsufficientCashException.class);
   }
+
+  @Test
+  void shouldRestoreTheSameStateItWasSavedWith() {
+    Portfolio original = withCash("10000.00");
+    original.buy(PETR4, "PETROBRAS PN", AssetClass.STOCKS, 100, Money.brl("38.00"), NO_COSTS, NOW);
+    original.sell(PETR4, 100, Money.brl("40.00"), NO_COSTS, NOW);
+    original.investFixedIncome(
+        "cdb-110", "CDB 110% do CDI", Money.brl("1000.00"), new BigDecimal("110"), false, NOW);
+
+    Portfolio restored = Portfolio.restore(original.state());
+
+    assertThat(restored.state()).isEqualTo(original.state());
+    assertThat(restored.realizedPnl()).isEqualTo(Money.brl("200.00"));
+  }
+
+  @Test
+  void shouldKeepNumberingOperationsAfterRestore() {
+    Portfolio original = withCash("1000.00");
+    original.investFixedIncome("cdb-110", "CDB", Money.brl("100.00"), BigDecimal.TEN, false, NOW);
+
+    Portfolio restored = Portfolio.restore(original.state());
+    FixedIncomeHolding next =
+        restored.investFixedIncome(
+            "cdb-110", "CDB", Money.brl("100.00"), BigDecimal.TEN, false, NOW);
+
+    assertThat(next.id()).isEqualTo(2);
+  }
 }

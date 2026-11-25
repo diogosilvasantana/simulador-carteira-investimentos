@@ -16,6 +16,10 @@ services:
       SPRING_DATASOURCE_USERNAME: simulador
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD}
       SPRING_DATA_REDIS_HOST: redis
+      # Domínio público do frontend; sem ele o navegador não abre o WebSocket de cotações
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8081}
+      # Segredo que a ponte MT5 envia junto das cotações; vazio desliga a ingestão
+      INGEST_TOKEN: ${INGEST_TOKEN:-}
     depends_on:
       postgres:
         condition: service_healthy
