@@ -2,214 +2,259 @@
   display: block;
 }
 
-.quotes__header {
+.quotes {
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  flex-direction: column;
+  gap: var(--space-8);
 }
 
-.status {
-  font-size: 0.8rem;
-  padding: 0.15rem 0.6rem;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  color: var(--muted);
-
-  &--connected {
-    color: var(--gain);
-    border-color: var(--gain);
-  }
-}
-
-.tabs {
+.types {
   display: flex;
-  gap: 0.25rem;
-  overflow-x: auto;
-  border-bottom: 1px solid var(--border);
-  margin: 0.5rem 0 1rem;
-}
-
-.tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-height: 44px;
-  padding: 0 0.9rem;
-  color: var(--muted);
-  text-decoration: none;
-  font-weight: 500;
-  border-bottom: 2px solid transparent;
-  white-space: nowrap;
-
-  &--active {
-    color: var(--text);
-    border-bottom-color: var(--accent);
-  }
-}
-
-.tab__count {
-  font-size: 0.75rem;
-  padding: 0.05rem 0.45rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--border) 70%, transparent);
-  font-variant-numeric: tabular-nums;
+  flex-direction: column;
+  gap: var(--space-4);
 }
 
 .toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
+  gap: var(--space-3) var(--space-4);
+  margin-bottom: calc(var(--space-4) * -1);
 }
 
 .count {
-  color: var(--muted);
-  font-size: 0.85rem;
+  color: var(--text-subtle);
+  font-size: 13px;
 }
 
 .search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   margin-left: auto;
-  min-height: 40px;
-  padding: 0 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  min-width: 14rem;
+  min-width: 240px;
+  height: 36px;
+  padding: 0 var(--space-3);
+  background: var(--surface-1);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+  color: var(--text-subtle);
+
+  &:focus-within {
+    border-color: var(--accent);
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    outline: none;
+  }
+
+  input::placeholder {
+    color: var(--text-subtle);
+  }
 }
 
 .empty {
-  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-6);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  max-width: 72ch;
+}
+
+.empty__title {
+  color: var(--text);
+  font-weight: 600;
 }
 
 .grid {
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
   overflow: hidden;
 }
 
 .viewport {
-  // Só a lista rola; o cabeçalho da tabela e as abas ficam no lugar.
-  height: calc(100dvh - 17rem);
-  min-height: 20rem;
+  // Só a lista rola; o cabeçalho e o carrossel ficam no lugar.
+  height: calc(100dvh - 30rem);
+  min-height: 22rem;
 }
 
 .row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 7rem 6.5rem 10rem 5.5rem 5.5rem;
+  grid-template-columns: minmax(0, 1fr) 7rem 7.5rem 11rem 6rem 6rem;
   align-items: center;
   height: 56px;
-  box-sizing: border-box;
-  padding: 0 0.75rem;
-  border-bottom: 1px solid var(--border);
+  padding: 0 var(--space-3);
+  border-bottom: 1px solid var(--line);
   font-variant-numeric: tabular-nums;
+  transition: background var(--duration-quick) var(--ease-out);
+
+  &:not(.row--head):hover {
+    background: var(--surface-2);
+  }
 
   &--head {
-    height: 44px;
-    color: var(--muted);
-    font-size: 0.85rem;
+    height: 40px;
+    border-bottom-color: var(--line-strong);
+    color: var(--text-muted);
+    font-size: 12px;
     font-weight: 500;
-    background: color-mix(in srgb, var(--border) 25%, var(--background));
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
   }
 }
 
 .cell {
-  padding: 0 0.5rem;
   min-width: 0;
+  padding: 0 var(--space-2);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.cell--asset {
-  display: flex;
-  flex-direction: column;
-}
-
-.ticker {
-  font-weight: 600;
-}
-
-.name,
-.cell--detail,
-.cell--time {
-  color: var(--muted);
-  font-size: 0.8rem;
 }
 
 .num {
   text-align: right;
 }
 
+.cell--asset {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.mono {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  color: var(--bg);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.asset {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ticker {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.name,
+.cell--detail,
+.cell--time {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
 .sort {
   all: unset;
   cursor: pointer;
+  border-radius: 2px;
+
+  &:hover {
+    color: var(--text);
+  }
 
   &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
+    box-shadow: var(--focus-ring);
   }
 }
 
-[aria-sort='ascending'] .sort::after {
-  content: ' ▲';
+[aria-sort='ascending'] .sort,
+[aria-sort='descending'] .sort {
+  color: var(--text);
+}
+
+// Triângulo da ordenação: aponta para cima na crescente e para baixo na decrescente.
+[aria-sort='ascending'] .sort::after,
+[aria-sort='descending'] .sort::after {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 5px;
+  margin-left: 6px;
+  vertical-align: middle;
+  background: var(--accent);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
 }
 
 [aria-sort='descending'] .sort::after {
-  content: ' ▼';
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
 }
 
+// Só o preço pisca ao mudar: fundo suave que some, sem mexer no resto da linha.
 .last {
-  font-weight: 600;
-
-  &--up {
-    color: var(--gain);
-    animation: flash-gain 0.8s ease-out;
-  }
-
-  &--down {
-    color: var(--loss);
-    animation: flash-loss 0.8s ease-out;
-  }
-}
-
-.change {
+  display: inline-block;
+  padding: 1px 6px;
+  margin-right: -6px;
+  border-radius: var(--radius-xs);
   font-weight: 500;
 
   &--up {
-    color: var(--gain);
+    animation: flash-gain var(--duration-flash) var(--ease-out);
   }
 
   &--down {
-    color: var(--loss);
+    animation: flash-loss var(--duration-flash) var(--ease-out);
   }
 }
 
 @keyframes flash-gain {
   from {
-    background: color-mix(in srgb, var(--gain) 25%, transparent);
+    background: var(--gain-soft);
+    color: var(--gain);
   }
 }
 
 @keyframes flash-loss {
   from {
-    background: color-mix(in srgb, var(--loss) 25%, transparent);
+    background: var(--loss-soft);
+    color: var(--loss);
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .last--up,
-  .last--down {
-    animation: none;
-  }
+.skeleton .row {
+  grid-template-columns: minmax(0, 1fr) 7rem 7.5rem;
 }
 
-// No celular ficam ativo, último e variação.
-@media (max-width: 640px) {
+.bone--mono {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+}
+
+.bone--text {
+  width: 40%;
+  height: 10px;
+}
+
+.bone--num {
+  width: 56px;
+  height: 12px;
+}
+
+@media (max-width: 760px) {
   .row {
-    grid-template-columns: minmax(0, 1fr) 6rem 5.5rem;
+    grid-template-columns: minmax(0, 1fr) 5.5rem 6.5rem;
   }
 
   .cell--detail,
@@ -219,8 +264,13 @@
   }
 
   .search {
+    order: 3;
     margin-left: 0;
     min-width: 0;
     width: 100%;
+  }
+
+  .viewport {
+    height: calc(100dvh - 26rem);
   }
 }

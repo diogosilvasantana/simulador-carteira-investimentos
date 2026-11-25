@@ -1,0 +1,676 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-25T04:59:09+00:00",
+  "title": "Design System: Simulador de Carteira",
+  "extensions": {
+    "colorMeta": {
+      "bg": {
+        "role": "neutral",
+        "displayName": "Carvão Base",
+        "canonical": "#0d0e12",
+        "cssVar": "--bg",
+        "tonalRamp": [
+          "#0b0b0d",
+          "#242528",
+          "#414246",
+          "#606166",
+          "#818287",
+          "#a4a5a9",
+          "#c8c9cd",
+          "#edeef1"
+        ]
+      },
+      "surface-1": {
+        "role": "neutral",
+        "displayName": "Carvão 1",
+        "canonical": "#14151b",
+        "cssVar": "--surface-1",
+        "tonalRamp": [
+          "#0a0b0e",
+          "#242529",
+          "#414247",
+          "#5f6168",
+          "#808289",
+          "#a3a5ab",
+          "#c8c9ce",
+          "#edeef2"
+        ]
+      },
+      "surface-2": {
+        "role": "neutral",
+        "displayName": "Carvão 2",
+        "canonical": "#1b1c24",
+        "cssVar": "--surface-2",
+        "tonalRamp": [
+          "#0a0b0e",
+          "#24252a",
+          "#404149",
+          "#5f606a",
+          "#80828b",
+          "#a3a4ad",
+          "#c7c9d0",
+          "#edeef4"
+        ]
+      },
+      "surface-3": {
+        "role": "neutral",
+        "displayName": "Carvão 3",
+        "canonical": "#23242e",
+        "cssVar": "--surface-3",
+        "tonalRamp": [
+          "#0a0b0f",
+          "#24242b",
+          "#40414a",
+          "#5f606b",
+          "#80818d",
+          "#a3a4ae",
+          "#c7c8d1",
+          "#edeef5"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Linha",
+        "canonical": "#2a2c37",
+        "cssVar": "--line",
+        "tonalRamp": [
+          "#0a0b0f",
+          "#23252b",
+          "#40414b",
+          "#5e606c",
+          "#7f828e",
+          "#a2a4af",
+          "#c7c9d2",
+          "#eceef5"
+        ]
+      },
+      "line-strong": {
+        "role": "neutral",
+        "displayName": "Linha Forte",
+        "canonical": "#3a3c4a",
+        "cssVar": "--line-strong",
+        "tonalRamp": [
+          "#0a0b10",
+          "#23242d",
+          "#3f414c",
+          "#5e606e",
+          "#7f8190",
+          "#a2a4b1",
+          "#c7c8d3",
+          "#eceef7"
+        ]
+      },
+      "control-border": {
+        "role": "neutral",
+        "displayName": "Borda de Controle",
+        "canonical": "#666a80",
+        "cssVar": "--control-border",
+        "tonalRamp": [
+          "#090b12",
+          "#222430",
+          "#3e4151",
+          "#5c6074",
+          "#7d8196",
+          "#a0a4b7",
+          "#c5c8d8",
+          "#ebeefa"
+        ]
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Texto",
+        "canonical": "#ececf1",
+        "cssVar": "--text",
+        "tonalRamp": [
+          "#0b0b0c",
+          "#252527",
+          "#424245",
+          "#616165",
+          "#828286",
+          "#a4a4a8",
+          "#c9c9cc",
+          "#eeeef1"
+        ]
+      },
+      "text-muted": {
+        "role": "neutral",
+        "displayName": "Texto Apagado",
+        "canonical": "#a3a5b5",
+        "cssVar": "--text-muted",
+        "tonalRamp": [
+          "#0a0b10",
+          "#23242c",
+          "#40414c",
+          "#5e606e",
+          "#7f818f",
+          "#a2a4b1",
+          "#c7c8d3",
+          "#edeef6"
+        ]
+      },
+      "text-subtle": {
+        "role": "neutral",
+        "displayName": "Texto Sutil",
+        "canonical": "#868aa0",
+        "cssVar": "--text-subtle",
+        "tonalRamp": [
+          "#090b12",
+          "#22242f",
+          "#3e4150",
+          "#5d6073",
+          "#7d8195",
+          "#a1a4b6",
+          "#c5c8d7",
+          "#ebeefa"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Índigo Claro",
+        "canonical": "#9091ff",
+        "cssVar": "--accent",
+        "tonalRamp": [
+          "#09032a",
+          "#1f1a54",
+          "#393581",
+          "#5552b1",
+          "#7575d7",
+          "#989bf1",
+          "#bdc2ff",
+          "#e5e9ff"
+        ]
+      },
+      "accent-strong": {
+        "role": "primary",
+        "displayName": "Índigo de Ação",
+        "canonical": "#5b5cf0",
+        "cssVar": "--accent-strong",
+        "tonalRamp": [
+          "#080036",
+          "#1a1065",
+          "#312c99",
+          "#4b49cf",
+          "#686ef7",
+          "#8b98ff",
+          "#b2c0ff",
+          "#dbe9ff"
+        ]
+      },
+      "accent-soft": {
+        "role": "primary",
+        "displayName": "Índigo Profundo",
+        "canonical": "#1f2040",
+        "cssVar": "--accent-soft",
+        "tonalRamp": [
+          "#090a17",
+          "#212337",
+          "#3d3f5a",
+          "#5b5e80",
+          "#7b7fa3",
+          "#9fa2c2",
+          "#c4c7e2",
+          "#eaedff"
+        ]
+      },
+      "accent-line": {
+        "role": "primary",
+        "displayName": "Linha Índigo",
+        "canonical": "#2c2d5a",
+        "cssVar": "--accent-line",
+        "tonalRamp": [
+          "#08091b",
+          "#20223d",
+          "#3c3e62",
+          "#595c8a",
+          "#797eae",
+          "#9da1cc",
+          "#c2c6ea",
+          "#e9ecff"
+        ]
+      },
+      "on-accent": {
+        "role": "primary",
+        "displayName": "Branco sobre Índigo",
+        "canonical": "#ffffff",
+        "cssVar": "--on-accent",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "gain": {
+        "role": "secondary",
+        "displayName": "Menta de Alta",
+        "canonical": "#3dd68c",
+        "cssVar": "--gain",
+        "tonalRamp": [
+          "#001400",
+          "#00320d",
+          "#005524",
+          "#00793b",
+          "#009c5c",
+          "#53bd84",
+          "#8ddeae",
+          "#c2ffd9"
+        ]
+      },
+      "gain-soft": {
+        "role": "secondary",
+        "displayName": "Menta Tonal",
+        "canonical": "#0f2a1e",
+        "cssVar": "--gain-soft",
+        "tonalRamp": [
+          "#040e09",
+          "#192921",
+          "#33473d",
+          "#4e685b",
+          "#6f8a7c",
+          "#94ac9f",
+          "#bbcfc4",
+          "#e3f3ea"
+        ]
+      },
+      "loss": {
+        "role": "secondary",
+        "displayName": "Rosa de Baixa",
+        "canonical": "#ff6b7a",
+        "cssVar": "--loss",
+        "tonalRamp": [
+          "#250001",
+          "#4f0010",
+          "#7c0e26",
+          "#ab273e",
+          "#d34e5e",
+          "#f07d85",
+          "#ffaaaf",
+          "#ffd7d9"
+        ]
+      },
+      "loss-soft": {
+        "role": "secondary",
+        "displayName": "Rosa Tonal",
+        "canonical": "#36161c",
+        "cssVar": "--loss-soft",
+        "tonalRamp": [
+          "#140709",
+          "#331e21",
+          "#55393d",
+          "#7a565b",
+          "#9d777c",
+          "#bd9b9f",
+          "#ddc1c4",
+          "#ffe8eb"
+        ]
+      },
+      "warning": {
+        "role": "secondary",
+        "displayName": "Âmbar de Simulação",
+        "canonical": "#f2b84b",
+        "cssVar": "--warning",
+        "tonalRamp": [
+          "#190500",
+          "#3b1d00",
+          "#5f3900",
+          "#875600",
+          "#aa7800",
+          "#c99d4f",
+          "#e8c386",
+          "#ffeabb"
+        ]
+      },
+      "warning-soft": {
+        "role": "secondary",
+        "displayName": "Âmbar Tonal",
+        "canonical": "#33270f",
+        "cssVar": "--warning-soft",
+        "tonalRamp": [
+          "#0f0a03",
+          "#2b2416",
+          "#4a412e",
+          "#6c6048",
+          "#8e8168",
+          "#afa48e",
+          "#d2c8b6",
+          "#f5eedf"
+        ]
+      },
+      "asset-acoes": {
+        "role": "tertiary",
+        "displayName": "Ações",
+        "canonical": "#338ced",
+        "cssVar": "--asset-acoes",
+        "tonalRamp": [
+          "#00072c",
+          "#002356",
+          "#004085",
+          "#0060b6",
+          "#3383dc",
+          "#67a8f5",
+          "#98cdff",
+          "#c8f2ff"
+        ]
+      },
+      "asset-renda-fixa": {
+        "role": "tertiary",
+        "displayName": "Renda fixa",
+        "canonical": "#e76624",
+        "cssVar": "--asset-renda-fixa",
+        "tonalRamp": [
+          "#240000",
+          "#4d0300",
+          "#791c00",
+          "#a83500",
+          "#cf5a1d",
+          "#ec865a",
+          "#ffb18d",
+          "#ffddc0"
+        ]
+      },
+      "asset-fiagros": {
+        "role": "tertiary",
+        "displayName": "Fiagros",
+        "canonical": "#00a888",
+        "cssVar": "--asset-fiagros",
+        "tonalRamp": [
+          "#001208",
+          "#003121",
+          "#00523d",
+          "#00765a",
+          "#03987b",
+          "#5cb99f",
+          "#92dbc4",
+          "#c5fdea"
+        ]
+      },
+      "asset-fiis": {
+        "role": "tertiary",
+        "displayName": "FIIs",
+        "canonical": "#d28e05",
+        "cssVar": "--asset-fiis",
+        "tonalRamp": [
+          "#1b0400",
+          "#3e1b00",
+          "#643500",
+          "#8d5200",
+          "#b17400",
+          "#cf9a4c",
+          "#edc184",
+          "#ffe8b9"
+        ]
+      },
+      "asset-bdrs": {
+        "role": "tertiary",
+        "displayName": "BDRs",
+        "canonical": "#e24d8b",
+        "cssVar": "--asset-bdrs",
+        "tonalRamp": [
+          "#25000b",
+          "#4d0024",
+          "#7a0541",
+          "#a92060",
+          "#d14981",
+          "#ee79a4",
+          "#ffa7c8",
+          "#ffd5ee"
+        ]
+      },
+      "asset-etfs": {
+        "role": "tertiary",
+        "displayName": "ETFs",
+        "canonical": "#9887ef",
+        "cssVar": "--asset-etfs",
+        "tonalRamp": [
+          "#0d0227",
+          "#26194f",
+          "#42337b",
+          "#614faa",
+          "#8172cf",
+          "#a398ea",
+          "#c7bfff",
+          "#ece7ff"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Só o título de abertura da página inicial (26 px / 32 px no celular)."
+      },
+      "metric": {
+        "displayName": "Métrica",
+        "purpose": "Valor grande de indicador, como a taxa anual do CDI."
+      },
+      "headline": {
+        "displayName": "Título de tela",
+        "purpose": "H1 de cada tela, uma vez só."
+      },
+      "title": {
+        "displayName": "Título de bloco",
+        "purpose": "H2 de seção dentro da tela."
+      },
+      "body": {
+        "displayName": "Corpo",
+        "purpose": "Texto corrente e células de tabela."
+      },
+      "body-small": {
+        "displayName": "Corpo pequeno",
+        "purpose": "Descrições de card, nome do ativo, notas."
+      },
+      "label": {
+        "displayName": "Rótulo",
+        "purpose": "Cabeçalho de coluna (maiúsculas) e rótulo de campo (caixa normal)."
+      },
+      "seal": {
+        "displayName": "Selo",
+        "purpose": "Só o selo SIMULADO, em maiúsculas."
+      }
+    },
+    "shadows": [
+      {
+        "name": "shadow-pop",
+        "value": "0 12px 32px rgba(0, 0, 0, 0.45)",
+        "purpose": "Camadas flutuantes; definido mas ainda sem uso nas telas construídas."
+      },
+      {
+        "name": "focus-ring",
+        "value": "0 0 0 2px var(--bg), 0 0 0 4px var(--accent)",
+        "purpose": "Foco visível de todo elemento interativo."
+      }
+    ],
+    "motion": [
+      {
+        "name": "duration-quick",
+        "value": "140ms",
+        "purpose": "Transições de hover, seleção e da largura do menu."
+      },
+      {
+        "name": "duration-flash",
+        "value": "600ms",
+        "purpose": "Piscada do último preço ao mudar."
+      },
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Curva padrão de todas as transições."
+      },
+      {
+        "name": "pulse",
+        "value": "1.4s ease-in-out infinite",
+        "purpose": "Esqueleto de carregamento."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "prefers-reduced-motion: reduce → 1ms",
+        "purpose": "Toda transição e animação cai para 1 ms."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mobile",
+        "value": "760px",
+        "purpose": "Até aqui o menu vira barra inferior e as tabelas escondem colunas secundárias."
+      }
+    ],
+    "layout": {
+      "navOpen": "232px",
+      "navClosed": "64px",
+      "headerHeight": "56px",
+      "contentMax": "1200px"
+    },
+    "reference": {
+      "artifact": "https://claude.ai/artifact/FWFzawgZnJurbJ3fsNu5VT",
+      "note": "Design System aprovado; contém componentes ainda não construídos no Angular (gráficos, boleta, mapa de calor)."
+    }
+  },
+  "components": [
+    {
+      "name": "Botão primário",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ação principal da tela; índigo cheio, um por grupo de ações.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">Simular</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:var(--radius-sm);border:1px solid var(--control-border);background:transparent;color:var(--text);font-family:var(--font-sans);font-size:14px;font-weight:600;cursor:pointer;transition:background var(--duration-quick) var(--ease-out),border-color var(--duration-quick) var(--ease-out)} .ds-btn-primary{background:var(--accent-strong);border-color:var(--accent-strong);color:var(--on-accent)} .ds-btn-primary:hover{background:#4b4ce0} .ds-btn:focus-visible{outline:none;box-shadow:var(--focus-ring)} .ds-btn:disabled{opacity:.45;cursor:default}"
+    },
+    {
+      "name": "Botão secundário",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Ação alternativa; contorno em borda de controle.",
+      "html": "<button class=\"ds-btn-secondary\">Simular renda fixa</button>",
+      "css": ".ds-btn-secondary{display:inline-flex;align-items:center;min-height:40px;padding:0 16px;border-radius:var(--radius-sm);border:1px solid var(--control-border);background:transparent;color:var(--text);font-family:var(--font-sans);font-size:14px;font-weight:600;cursor:pointer;transition:background var(--duration-quick) var(--ease-out)} .ds-btn-secondary:hover{background:var(--surface-2)} .ds-btn-secondary:focus-visible{outline:none;box-shadow:var(--focus-ring)}"
+    },
+    {
+      "name": "Campo de formulário",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Rótulo acima, campo em carvão 2; borda rosa quando inválido.",
+      "html": "<label class=\"ds-field\">Valor aplicado (R$)<input value=\"10.000,00\" inputmode=\"decimal\"></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:6px;font-family:var(--font-sans);font-size:12px;font-weight:500;color:var(--text-muted)} .ds-field input{min-height:40px;padding:0 12px;background:var(--surface-2);border:1px solid var(--control-border);border-radius:var(--radius-sm);color:var(--text);font:inherit;font-size:14px;font-weight:400;font-variant-numeric:tabular-nums} .ds-field input:focus-visible{outline:none;border-color:var(--accent);box-shadow:var(--focus-ring)} .ds-field input[aria-invalid=true]{border-color:var(--loss)}"
+    },
+    {
+      "name": "Busca",
+      "kind": "input",
+      "refersTo": "input-search",
+      "description": "Busca em pílula com lupa de traço; foco tinge a borda de índigo.",
+      "html": "<label class=\"ds-search\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" aria-hidden=\"true\"><path d=\"M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zm9 16-4.3-4.3\"/></svg><input type=\"search\" placeholder=\"Ticker ou nome\"></label>",
+      "css": ".ds-search{display:flex;align-items:center;gap:8px;min-width:240px;height:36px;padding:0 12px;background:var(--surface-1);border:1px solid var(--control-border);border-radius:var(--radius-pill);color:var(--text-subtle);font-family:var(--font-sans);font-size:14px} .ds-search:focus-within{border-color:var(--accent)} .ds-search input{flex:1;min-width:0;border:0;background:transparent;outline:none;color:var(--text);font:inherit} .ds-search input::placeholder{color:var(--text-subtle)}"
+    },
+    {
+      "name": "Menu lateral",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "Itens de 40 px com ícone de traço; ativo em índigo profundo. Recolhe para 64 px e vira barra inferior no celular.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-item\" href=\"#\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z\"/></svg>Início</a><a class=\"ds-nav-item ds-nav-item-active\" href=\"#\" aria-current=\"page\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 19V9m6 10V5m6 14v-8m6 8H2\"/></svg>Cotações</a><a class=\"ds-nav-item\" href=\"#\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 9 12 4l9 5M5 10v8m4.5-8v8m5-8v8M19 10v8M3 20h18\"/></svg>Renda fixa</a></nav>",
+      "css": ".ds-nav{display:flex;flex-direction:column;gap:4px;width:232px;padding:16px 12px;background:var(--surface-1);border-right:1px solid var(--line);font-family:var(--font-sans);font-size:14px} .ds-nav-item{display:flex;align-items:center;gap:12px;min-height:40px;padding:0 12px;border-radius:var(--radius-sm);color:var(--text-muted);font-weight:500;text-decoration:none;transition:background var(--duration-quick) var(--ease-out),color var(--duration-quick) var(--ease-out)} .ds-nav-item:hover{background:var(--surface-2);color:var(--text)} .ds-nav-item-active,.ds-nav-item-active:hover{background:var(--accent-soft);color:var(--accent)} .ds-nav-item:focus-visible{outline:none;box-shadow:var(--focus-ring)}"
+    },
+    {
+      "name": "Selo SIMULADO",
+      "kind": "chip",
+      "refersTo": "sim-seal",
+      "description": "Pílula âmbar fixa no canto direito da faixa superior de toda tela.",
+      "html": "<span class=\"ds-sim\" title=\"Nenhuma ordem chega à B3\">SIMULADO</span>",
+      "css": ".ds-sim{display:inline-flex;align-items:center;height:24px;padding:0 12px;border-radius:var(--radius-pill);background:var(--warning-soft);color:var(--warning);font-family:var(--font-sans);font-size:11px;font-weight:700;letter-spacing:.06em}"
+    },
+    {
+      "name": "Status de conexão",
+      "kind": "chip",
+      "refersTo": "status-pill",
+      "description": "Pílula com ponto de estado; só em Cotações, à esquerda da faixa superior.",
+      "html": "<span class=\"ds-status ds-status-connected\">Ao vivo</span> <span class=\"ds-status ds-status-connecting\">Conectando às cotações…</span>",
+      "css": ".ds-status{display:inline-flex;align-items:center;gap:8px;height:28px;padding:0 12px;border-radius:var(--radius-pill);border:1px solid var(--line);font-family:var(--font-sans);font-size:12px;font-weight:500;color:var(--text-muted);white-space:nowrap} .ds-status::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--text-subtle)} .ds-status-connected::before{background:var(--gain)} .ds-status-connecting::before{background:var(--warning)}"
+    },
+    {
+      "name": "Variação com seta",
+      "kind": "chip",
+      "refersTo": "change-up",
+      "description": "Alta e baixa com seta desenhada em CSS, sinal e texto para leitor de tela.",
+      "html": "<span class=\"ds-change ds-change-up\"><span class=\"ds-arrow\" aria-hidden=\"true\"></span>+1,79%</span> <span class=\"ds-change ds-change-down\"><span class=\"ds-arrow\" aria-hidden=\"true\"></span>-1,98%</span>",
+      "css": ".ds-change{display:inline-flex;align-items:center;gap:4px;padding:1px 6px;border-radius:var(--radius-xs);font-family:var(--font-sans);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--text-muted)} .ds-change-up{color:var(--gain);background:var(--gain-soft)} .ds-change-down{color:var(--loss);background:var(--loss-soft)} .ds-arrow{width:8px;height:5px;background:currentColor} .ds-change-up .ds-arrow{clip-path:polygon(50% 0,100% 100%,0 100%)} .ds-change-down .ds-arrow{clip-path:polygon(0 0,100% 0,50% 100%)}"
+    },
+    {
+      "name": "Card do carrossel de tipos",
+      "kind": "card",
+      "refersTo": "type-tile",
+      "description": "Card de classe de ativo com traço da cor da classe; o ativo fica em índigo profundo.",
+      "html": "<div class=\"ds-tiles\"><a class=\"ds-tile ds-tile-active\" href=\"#\" aria-current=\"page\"><span class=\"ds-tile-mark\" style=\"background:var(--asset-acoes)\"></span><span class=\"ds-tile-label\">Ações</span><span class=\"ds-tile-desc\">Sócio de empresas, com dividendos e valorização.</span><span class=\"ds-tile-foot\">452 ativos</span></a><a class=\"ds-tile\" href=\"#\"><span class=\"ds-tile-mark\" style=\"background:var(--asset-fiis)\"></span><span class=\"ds-tile-label\">FIIs</span><span class=\"ds-tile-desc\">Renda mensal de imóveis e recebíveis.</span><span class=\"ds-tile-foot\">318 ativos</span></a></div>",
+      "css": ".ds-tiles{display:grid;grid-auto-flow:column;grid-auto-columns:196px;gap:12px} .ds-tile{display:flex;flex-direction:column;gap:8px;min-height:144px;padding:16px;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--surface-1);color:var(--text);font-family:var(--font-sans);text-decoration:none;transition:border-color var(--duration-quick) var(--ease-out),background var(--duration-quick) var(--ease-out)} .ds-tile:hover{border-color:var(--line-strong);background:var(--surface-2)} .ds-tile-active,.ds-tile-active:hover{border-color:var(--accent);background:var(--accent-soft)} .ds-tile:focus-visible{outline:none;box-shadow:var(--focus-ring)} .ds-tile-mark{width:24px;height:4px;border-radius:2px} .ds-tile-label{font-size:15px;font-weight:600} .ds-tile-desc{flex:1;font-size:12px;line-height:17px;color:var(--text-muted)} .ds-tile-foot{font-size:12px;color:var(--text-subtle);font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Linha de cotação",
+      "kind": "custom",
+      "refersTo": "asset-monogram",
+      "description": "Linha de 56 px da tabela ao vivo: monograma na cor da classe, ticker, preço que pisca e variação.",
+      "html": "<div class=\"ds-row\"><span class=\"ds-asset\"><span class=\"ds-mono\" style=\"background:var(--asset-acoes)\">AB</span><span class=\"ds-asset-text\"><span class=\"ds-ticker\">ABEV3</span><span class=\"ds-name\">AMBEV S/A ON</span></span></span><span class=\"ds-last\">78,79</span><span class=\"ds-chg\">+1,79%</span></div>",
+      "css": ".ds-row{display:grid;grid-template-columns:minmax(0,1fr) 7rem 7.5rem;align-items:center;height:56px;padding:0 12px;background:var(--surface-1);border-bottom:1px solid var(--line);font-family:var(--font-sans);font-size:14px;color:var(--text);font-variant-numeric:tabular-nums;transition:background var(--duration-quick) var(--ease-out)} .ds-row:hover{background:var(--surface-2)} .ds-asset{display:flex;align-items:center;gap:12px} .ds-mono{display:grid;place-items:center;width:32px;height:32px;border-radius:var(--radius-sm);color:var(--bg);font-family:var(--font-display);font-size:12px;font-weight:600} .ds-asset-text{display:flex;flex-direction:column} .ds-ticker{font-weight:600;letter-spacing:.01em} .ds-name{font-size:12px;color:var(--text-muted)} .ds-last{justify-self:end;padding:1px 6px;border-radius:var(--radius-xs);font-weight:500;animation:ds-flash 600ms var(--ease-out) infinite alternate} .ds-chg{justify-self:end;color:var(--gain);font-weight:600} @keyframes ds-flash{from{background:var(--gain-soft);color:var(--gain)}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "A Mesa de Treino Noturna",
+    "overview": "Uma mesa de operação escura e calma onde o preço é o protagonista. O fundo é carvão neutro em camadas (sem matiz quente nem azul de \"fintech\"), e quase tudo é texto e número sobre essas camadas, separados por linhas finas. A cor aparece com função: índigo só para marca, seleção e ação; verde-menta e rosa só para alta e baixa, sempre com seta e sinal; as cores de classe de ativo só em traços curtos e monogramas. O selo âmbar SIMULADO fica no topo de toda tela, porque o produto nunca pode parecer uma corretora real.\n\nA densidade é de ferramenta, não de landing page: corpo de 14 px, linhas de tabela de 56 px, números tabulares alinhados à direita. A personalidade vem do Space Grotesk em poucos pontos (marca, título de abertura, números grandes e monogramas) contra um Inter discreto em todo o resto. O movimento é curto e informativo: só o preço que mudou pisca, e tudo respeita a redução de movimento.",
+    "keyCharacteristics": [
+      "Carvão em quatro camadas (`bg`, `surface-1..3`) com profundidade por tom e linha, não por sombra",
+      "Índigo raro e com significado: marca, item ativo, ação primária, seleção, foco",
+      "Alta e baixa nunca só pela cor: seta desenhada em CSS mais sinal `+`/`-`",
+      "Cores de classe de ativo em traços de 24 × 4 px e monogramas de 32 px, nunca em superfícies grandes",
+      "Selo SIMULADO âmbar sempre visível na faixa superior",
+      "Números com `tabular-nums`, alinhados à direita"
+    ],
+    "rules": [
+      {
+        "name": "A Regra do Índigo com Função",
+        "body": "Índigo só marca marca, seleção, ação e foco. Nunca decora um título, um ícone solto ou um fundo de seção.",
+        "section": "colors"
+      },
+      {
+        "name": "A Regra da Seta e do Sinal",
+        "body": "Verde e rosa nunca carregam sozinhos o sentido de alta ou baixa: toda variação leva a seta desenhada em CSS, o sinal e um texto para leitor de tela (\"Alta de\", \"Baixa de\").",
+        "section": "colors"
+      },
+      {
+        "name": "A Regra do Traço de Classe",
+        "body": "Cor de classe de ativo aparece em traço curto ou monograma, nunca como fundo de card, de seção ou de linha.",
+        "section": "colors"
+      },
+      {
+        "name": "A Regra do Número Tabular",
+        "body": "Todo número que se compara com outro (preço, variação, volume, horário, valor em reais, taxa) usa `tabular-nums` e se alinha à direita na tabela.",
+        "section": "typography"
+      },
+      {
+        "name": "A Regra do Grotesk Raro",
+        "body": "Space Grotesk só na marca, no título de abertura, em números de destaque e nos monogramas. Títulos de tela e de bloco ficam em Inter.",
+        "section": "typography"
+      },
+      {
+        "name": "A Regra do Degrau de Carvão",
+        "body": "Para destacar uma superfície, suba um degrau de carvão ou troque a linha; não adicione sombra.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do usar só os tokens de `styles.scss` (com os mesmos nomes do artifact) para cor, espaço, raio e movimento.",
+      "Do manter o selo SIMULADO na faixa superior de toda tela.",
+      "Do acompanhar toda alta e baixa com seta, sinal e texto para leitor de tela.",
+      "Do usar `tabular-nums` e alinhar à direita todo número comparável.",
+      "Do destacar seleção com índigo profundo (`accent-soft`) e borda ou texto índigo claro (`accent`).",
+      "Do mostrar o status da conexão só onde há fluxo de cotações aberto.",
+      "Do desenhar o esqueleto de carregamento no formato do conteúdo que vai chegar.",
+      "Do deixar o movimento curto (140 ms em estados, 600 ms na piscada) e respeitar `prefers-reduced-motion`."
+    ],
+    "donts": [
+      "Don't usar verde ou rosa como única pista de alta e baixa.",
+      "Don't pintar cards, seções ou linhas inteiras com a cor de classe de ativo; ela fica no traço e no monograma.",
+      "Don't usar índigo como decoração de título, ícone ou fundo de seção.",
+      "Don't adicionar sombra a superfícies em repouso; a profundidade é tonal.",
+      "Don't repetir o título da tela na faixa superior; o H1 aparece uma vez só, na página.",
+      "Don't mostrar dados que pareçam reais em áreas ainda sem backend (carteira, ordens, proventos).",
+      "Don't copiar cores ou estrutura do Íon (Itaú); a referência é só estrutural e inspiracional."
+    ]
+  }
+}

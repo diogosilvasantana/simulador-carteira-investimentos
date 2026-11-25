@@ -1,35 +1,371 @@
+// Tokens do Design System "Simulador de Carteira" (Carvão e Índigo). Os nomes são os mesmos
+// do artifact, para quem lê um e o outro falar a mesma língua.
 :root {
-  --background: #ffffff;
-  --text: #1a1d21;
-  --muted: #5f6670;
-  --border: #e3e6ea;
-  --accent: #1f6feb;
-  --gain: #1a7f37;
-  --loss: #cf222e;
-  color-scheme: light dark;
+  color-scheme: dark;
+
+  --bg: #0d0e12;
+  --surface-1: #14151b;
+  --surface-2: #1b1c24;
+  --surface-3: #23242e;
+  --line: #2a2c37;
+  --line-strong: #3a3c4a;
+  --control-border: #666a80;
+
+  --text: #ececf1;
+  --text-muted: #a3a5b5;
+  --text-subtle: #868aa0;
+
+  --accent: #9091ff;
+  --accent-strong: #5b5cf0;
+  --accent-soft: #1f2040;
+  --accent-line: #2c2d5a;
+  --on-accent: #ffffff;
+
+  --gain: #3dd68c;
+  --gain-soft: #0f2a1e;
+  --loss: #ff6b7a;
+  --loss-soft: #36161c;
+  --warning: #f2b84b;
+  --warning-soft: #33270f;
+
+  // Classes de ativo, na ordem fixa dos gráficos e da alocação.
+  --asset-acoes: #338ced;
+  --asset-renda-fixa: #e76624;
+  --asset-fiagros: #00a888;
+  --asset-fiis: #d28e05;
+  --asset-bdrs: #e24d8b;
+  --asset-etfs: #9887ef;
+
+  --font-sans: 'Inter Variable', Inter, system-ui, 'Segoe UI', sans-serif;
+  --font-display: 'Space Grotesk', 'Inter Variable', system-ui, sans-serif;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  --shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.45);
+  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+
+  --duration-quick: 140ms;
+  --duration-flash: 600ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --nav-open: 232px;
+  --nav-closed: 64px;
+  --header-height: 56px;
+  --content-max: 1200px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f1115;
-    --text: #e6e8eb;
-    --muted: #9aa1aa;
-    --border: #2a2f36;
-    --accent: #58a6ff;
-    --gain: #3fb950;
-    --loss: #f85149;
-  }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 html,
 body {
   margin: 0;
-  background: var(--background);
+  min-height: 100%;
+  background: var(--bg);
   color: var(--text);
-  font-family:
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 20px;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'cv11' 1;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: 22px;
+  line-height: 30px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: 17px;
+  line-height: 24px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--accent);
+  text-underline-offset: 3px;
+}
+
+code {
+  font-size: 0.92em;
+  padding: 1px 5px;
+  border-radius: var(--radius-xs);
+  background: var(--surface-3);
+}
+
+// Superfícies do navegador também levam o design: seleção, foco, barras de rolagem e números.
+::selection {
+  background: var(--accent-strong);
+  color: var(--on-accent);
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+input,
+button,
+select {
+  font: inherit;
+  color: inherit;
+  accent-color: var(--accent-strong);
+  caret-color: var(--accent);
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+// Peças reaproveitadas entre telas.
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.page-head__lead {
+  margin-top: var(--space-1);
+  color: var(--text-muted);
+  max-width: 68ch;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--control-border);
+  background: transparent;
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background var(--duration-quick) var(--ease-out),
+    border-color var(--duration-quick) var(--ease-out);
+
+  &:hover {
+    background: var(--surface-2);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  &--primary {
+    background: var(--accent-strong);
+    border-color: var(--accent-strong);
+    color: var(--on-accent);
+
+    &:hover {
+      background: #4b4ce0;
+    }
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+
+  input,
+  select {
+    min-height: 40px;
+    padding: 0 var(--space-3);
+    background: var(--surface-2);
+    border: 1px solid var(--control-border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+
+    &:focus-visible {
+      border-color: var(--accent);
+    }
+
+    &[aria-invalid='true'] {
+      border-color: var(--loss);
+    }
+  }
+
+  input::placeholder {
+    color: var(--text-subtle);
+  }
+
+  input[type='date']::-webkit-calendar-picker-indicator {
+    filter: invert(0.8);
+  }
+}
+
+.notice {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line-strong);
+  color: var(--text-muted);
+
+  &--warning {
+    border-color: transparent;
+    background: var(--warning-soft);
+    color: var(--warning);
+  }
+
+  &--error {
+    border-color: transparent;
+    background: var(--loss-soft);
+    color: var(--loss);
+  }
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 28px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+
+  &::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-subtle);
+  }
+
+  &--connected::before {
+    background: var(--gain);
+  }
+
+  &--connecting::before {
+    background: var(--warning);
+  }
+
+  &--disconnected {
+    color: var(--loss);
+    border-color: var(--loss-soft);
+
+    &::before {
+      background: var(--loss);
+    }
+  }
+}
+
+// Variação com seta desenhada em CSS: alta aponta para cima, baixa para baixo, sempre com o sinal.
+.change {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  border-radius: var(--radius-xs);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+
+  &--up {
+    color: var(--gain);
+    background: var(--gain-soft);
+  }
+
+  &--down {
+    color: var(--loss);
+    background: var(--loss-soft);
+  }
+}
+
+// Seta desenhada em CSS: alta aponta para cima, baixa para baixo.
+.change__arrow {
+  width: 8px;
+  height: 5px;
+  background: currentColor;
+
+  .change--up > & {
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  }
+
+  .change--down > & {
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+  }
+}
+
+// Esqueleto de carregamento no formato do conteúdo que vai chegar.
+.bone {
+  display: inline-block;
+  border-radius: var(--radius-xs);
+  background: var(--surface-2);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+  }
 }

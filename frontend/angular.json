@@ -30,7 +30,12 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.scss"]
+            "styles": [
+              "@fontsource-variable/inter/index.css",
+              "@fontsource/space-grotesk/latin-500.css",
+              "@fontsource/space-grotesk/latin-600.css",
+              "src/styles.scss"
+            ]
           },
           "configurations": {
             "production": {
