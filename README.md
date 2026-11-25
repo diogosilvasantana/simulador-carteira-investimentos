@@ -67,8 +67,8 @@ janela, e abre o navegador ([guia completo](docs/guias/rodar-local-windows.md)):
 Cada parte separada:
 
 ```bash
-# backend
-cd backend && ./mvnw spring-boot:run
+# backend sem banco (perfil local; o padrão exige PostgreSQL via SPRING_DATASOURCE_URL)
+cd backend && ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 
 # frontend
 cd frontend && npm ci && npm start

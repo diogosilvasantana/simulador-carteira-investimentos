@@ -4,6 +4,16 @@ spring:
   threads:
     virtual:
       enabled: true
+  jpa:
+    # A sessão não fica aberta durante a resposta; o schema é só do Flyway e o Hibernate confere.
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  modulith:
+    events:
+      jdbc:
+        schema-initialization:
+          enabled: false
 
 management:
   endpoints:

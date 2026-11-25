@@ -2,6 +2,7 @@ package br.com.simuladorcarteira.portfolio;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import br.com.simuladorcarteira.PostgresTestConfiguration;
 import br.com.simuladorcarteira.marketdata.application.LatestQuoteRepository;
 import br.com.simuladorcarteira.marketdata.domain.Tick;
 import br.com.simuladorcarteira.marketdata.domain.TickSource;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
@@ -21,6 +23,7 @@ import org.springframework.web.client.RestClient;
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = "simulador.fixedincome.sync.enabled=false")
+@Import(PostgresTestConfiguration.class)
 class PortfolioApiIntegrationTest {
 
   @LocalServerPort private int port;

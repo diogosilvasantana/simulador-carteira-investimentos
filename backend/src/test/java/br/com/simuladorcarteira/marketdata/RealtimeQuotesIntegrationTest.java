@@ -3,6 +3,7 @@ package br.com.simuladorcarteira.marketdata;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import br.com.simuladorcarteira.PostgresTestConfiguration;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.List;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.messaging.converter.JacksonJsonMessageConverter;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
@@ -35,6 +37,7 @@ import org.springframework.web.socket.messaging.WebSocketStompClient;
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = "simulador.ingest.token=test-token")
+@Import(PostgresTestConfiguration.class)
 class RealtimeQuotesIntegrationTest {
 
   private static final String TICK =
