@@ -79,7 +79,9 @@ class PortfolioPersistenceIntegrationTest {
                             NOW)))
         .isInstanceOf(InsufficientCashException.class);
 
-    assertThat(repository.update(p -> p.cash())).isEqualTo(Money.brl("100.00"));
+    Money cash = repository.update(p -> p.cash());
+
+    assertThat(cash).isEqualTo(Money.brl("100.00"));
   }
 
   @Test
@@ -88,6 +90,8 @@ class PortfolioPersistenceIntegrationTest {
 
     repository.reset();
 
-    assertThat(repository.update(p -> p.state())).isEqualTo(PortfolioState.empty());
+    PortfolioState state = repository.update(p -> p.state());
+
+    assertThat(state).isEqualTo(PortfolioState.empty());
   }
 }
