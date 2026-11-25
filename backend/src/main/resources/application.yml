@@ -21,3 +21,27 @@ simulador:
     token: ${INGEST_TOKEN:}
   realtime:
     allowed-origins: ${ALLOWED_ORIGINS:http://localhost:4200}
+  fixedincome:
+    bcb:
+      base-url: ${BCB_BASE_URL:https://api.bcb.gov.br}
+    sync:
+      # Histórico buscado na primeira carga; a sincronização roda na subida e às 8h e 20h.
+      backfill-years: 3
+    # Tabelas versionadas pela data de vigência (ADR-011). Mudou a lei? Acrescente uma tabela com
+    # o novo valid-from em vez de editar a antiga.
+    taxes:
+      income-tax:
+        # Lei 11.033/2004: IR regressivo sobre o rendimento, pelo prazo em dias corridos
+        - valid-from: "2005-01-01"
+          brackets:
+            - up-to-days: 180
+              rate-percent: 22.5
+            - up-to-days: 360
+              rate-percent: 20
+            - up-to-days: 720
+              rate-percent: 17.5
+            - rate-percent: 15
+      iof:
+        # Decreto 6.306/2007 (anexo): IOF regressivo nos resgates com menos de 30 dias
+        - valid-from: "2008-01-01"
+          daily-rates-percent: [96, 93, 90, 86, 83, 80, 76, 73, 70, 66, 63, 60, 56, 53, 50, 46, 43, 40, 36, 33, 30, 26, 23, 20, 16, 13, 10, 6, 3]
