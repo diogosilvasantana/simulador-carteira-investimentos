@@ -95,6 +95,7 @@ flowchart LR
 | `trading` | Ordens, validação, execução simulada, custos | `OrderExecuted`, `OrderRejected` | `QuoteUpdated` |
 | `portfolio` | Carteiras, caixa, posições, preço médio, alocação-alvo | `PositionChanged`, `CashMoved` | `OrderExecuted`, `DividendPaid` |
 | `corporateactions` | Proventos, desdobramentos, grupamentos | `DividendPaid`, `SplitApplied` | `PositionChanged` |
+| `fixedincome` | Indexadores (CDI, Selic, IPCA), renda fixa simulada, IR e IOF ([ADR-011](../adr/0011-renda-fixa-simulada-com-indexadores-oficiais.md)) | `IndexRatesUpdated` | — |
 | `analytics` | Rentabilidade (TWR), benchmarks, rebalanceamento | — | `PositionChanged`, `CashMoved`, `QuoteUpdated` |
 | `shared` | Tipos comuns (`Money`, `Ticker`) | — | — |
 

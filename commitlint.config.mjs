@@ -23,6 +23,7 @@ export default {
         'trading',
         'portfolio',
         'corporateactions',
+        'fixedincome',
         'analytics',
         'shared',
         'simulator',

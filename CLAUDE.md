@@ -30,6 +30,12 @@ Use sempre estes nomes no código. Se um conceito novo surgir, adicione-o aqui e
 | Fechamento anterior | `previousClose` |
 | Variação (%) | `changePercent` |
 | Caixa | `cash` |
+| Renda fixa | `FixedIncome` |
+| Indexador (CDI, Selic, IPCA) | `RateIndex` |
+| Taxa do indexador num dia | `IndexRate` |
+| Percentual do indexador (ex.: 105% do CDI) | `indexPercentage` |
+| Resgate | `Redemption` |
+| Imposto de renda / IOF | `IncomeTax` / `Iof` |
 | Aporte | `Contribution` |
 | Provento | `CorporateAction` |
 | JCP | `InterestOnEquity` |
@@ -42,7 +48,7 @@ Use sempre estes nomes no código. Se um conceito novo surgir, adicione-o aqui e
 
 - Monólito modular (ADR-001). Módulos são pacotes de primeiro nível em
   `backend/src/main/java/br/com/simuladorcarteira/`: `identity`, `marketdata`, `trading`,
-  `portfolio`, `corporateactions`, `analytics`, `shared`
+  `portfolio`, `corporateactions`, `fixedincome`, `analytics`, `shared`
 - Dentro de cada módulo, hexagonal (ADR-002): `domain` (Java puro, sem Spring nem JPA),
   `application` (casos de uso e portas), `adapters/in` e `adapters/out`
 - Módulos só se comunicam pela API pública do pacote raiz do módulo ou por eventos (ADR-004)

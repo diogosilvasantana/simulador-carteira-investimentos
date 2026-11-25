@@ -36,6 +36,9 @@
 "module: corporateactions":
   - changed-files:
       - any-glob-to-any-file: "backend/src/*/java/br/com/simuladorcarteira/corporateactions/**"
+"module: fixedincome":
+  - changed-files:
+      - any-glob-to-any-file: "backend/src/*/java/br/com/simuladorcarteira/fixedincome/**"
 "module: analytics":
   - changed-files:
       - any-glob-to-any-file: "backend/src/*/java/br/com/simuladorcarteira/analytics/**"
