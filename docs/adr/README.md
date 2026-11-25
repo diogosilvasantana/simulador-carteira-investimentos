@@ -17,5 +17,6 @@ Formato: contexto, opções consideradas, decisão e consequências. Um ADR acei
 | [ADR-011](0011-renda-fixa-simulada-com-indexadores-oficiais.md) | Renda fixa simulada com indexadores oficiais | Aceito |
 | [ADR-012](0012-carteira-simulada-com-ordens-a-mercado.md) | Carteira simulada com ordens a mercado, em memória | Substituído em parte pelo ADR-013 |
 | [ADR-013](0013-carteira-persistida-com-sql-explicito-e-h2-local.md) | Carteira persistida com SQL explícito, PostgreSQL no servidor e H2 no PC | Aceito |
+| [ADR-014](0014-login-unico-com-sessao-no-servidor.md) | Login de um usuário só, com sessão no servidor | Aceito |
 
 Modelo para novos ADRs: [template.md](template.md)

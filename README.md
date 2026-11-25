@@ -62,6 +62,7 @@ janela, e abre o navegador ([guia completo](docs/guias/rodar-local-windows.md)):
 .\dev.cmd                     # cotações reais do MT5
 .\dev.cmd -Source synthetic   # mercado fechado
 .\dev.cmd -Stop               # encerra tudo
+# login no PC: usuário admin, senha simulador (em produção, APP_USERNAME e APP_PASSWORD_HASH)
 ```
 
 Cada parte separada:
