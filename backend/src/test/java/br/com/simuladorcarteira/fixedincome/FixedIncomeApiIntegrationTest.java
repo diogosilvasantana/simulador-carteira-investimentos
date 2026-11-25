@@ -2,6 +2,7 @@ package br.com.simuladorcarteira.fixedincome;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import br.com.simuladorcarteira.PostgresTestConfiguration;
 import br.com.simuladorcarteira.fixedincome.application.IndexRateRepository;
 import br.com.simuladorcarteira.fixedincome.domain.IndexRate;
 import br.com.simuladorcarteira.fixedincome.domain.RateIndex;
@@ -12,12 +13,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = "simulador.fixedincome.sync.enabled=false")
+@Import(PostgresTestConfiguration.class)
 class FixedIncomeApiIntegrationTest {
 
   private static final LocalDate MONDAY = LocalDate.of(2026, 11, 2);
