@@ -35,14 +35,28 @@ function Write-Step([string] $text) { Write-Host "`n> $text" -ForegroundColor Cy
 function Write-Ok([string] $text) { Write-Host "  $text" -ForegroundColor Green }
 function Fail([string] $text) { Write-Host "`n$text" -ForegroundColor Red; exit 1 }
 
-function Stop-Dev {
-  if (Test-Path $pidFile) {
-    foreach ($id in Get-Content $pidFile) {
-      # /T derruba a árvore inteira: a janela, o Maven, a JVM, o node...
-      & taskkill.exe /PID $id /T /F 2>$null | Out-Null
-    }
-    Remove-Item $pidFile
+# Cada linha do arquivo é "PID;início". O Windows reaproveita PIDs, então só conta como nossa a
+# janela com o mesmo PID e o mesmo horário de início; linhas antigas, só com o PID, valem se o
+# processo ainda for um PowerShell.
+function Get-DevWindows {
+  if (-not (Test-Path $pidFile)) { return @() }
+  foreach ($line in Get-Content $pidFile) {
+    $id, $started = $line.Split(';')
+    $process = Get-Process -Id $id -ErrorAction SilentlyContinue
+    if (-not $process) { continue }
+    if ($started) { $same = $process.StartTime.Ticks -eq [long] $started }
+    else { $same = $process.ProcessName -eq 'powershell' }
+    if ($same) { $process }
   }
+}
+
+function Stop-Dev {
+  foreach ($process in Get-DevWindows) {
+    # /T derruba a árvore inteira: a janela, o Maven, a JVM, o node...
+    # Pelo cmd, para o aviso de processo já encerrado não virar erro no PowerShell 5.1.
+    cmd /c "taskkill /PID $($process.Id) /T /F >nul 2>&1"
+  }
+  Remove-Item $pidFile -ErrorAction SilentlyContinue
   Write-Host 'Backend, frontend e ponte encerrados.' -ForegroundColor Green
 }
 
@@ -57,7 +71,7 @@ function Start-DevWindow([string] $title, [string] $dir, [string] $script) {
   $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($full))
   $process = Start-Process powershell -PassThru -ArgumentList @(
     '-NoExit', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', $encoded)
-  Add-Content -Path $pidFile -Value $process.Id
+  Add-Content -Path $pidFile -Value "$($process.Id);$($process.StartTime.Ticks)"
 }
 
 function Wait-Url([string] $url, [int] $seconds, [scriptblock] $isReady) {
@@ -75,8 +89,7 @@ function Wait-Url([string] $url, [int] $seconds, [scriptblock] $isReady) {
 if ($Stop) { Stop-Dev; exit 0 }
 
 if (Test-Path $pidFile) {
-  $alive = Get-Content $pidFile | Where-Object { Get-Process -Id $_ -ErrorAction SilentlyContinue }
-  if ($alive) { Fail 'Já existe uma execução aberta. Rode .\dev.cmd -Stop antes de subir de novo.' }
+  if (Get-DevWindows) { Fail 'Já existe uma execução aberta. Rode .\dev.cmd -Stop antes de subir de novo.' }
   # Janelas de uma execução anterior que já foram fechadas: nada a encerrar.
   Remove-Item $pidFile
 }
