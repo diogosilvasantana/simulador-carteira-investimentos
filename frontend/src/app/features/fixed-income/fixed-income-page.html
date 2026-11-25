@@ -99,6 +99,21 @@
     }
 
     @if (results().length > 0) {
+      <p class="cash" aria-live="polite">
+        @if (portfolio.summary(); as summary) {
+          Caixa da carteira: <strong class="num">{{ brl(summary.cash) }}</strong>. "Aplicar" usa o
+          valor acima, a partir de hoje.
+        }
+      </p>
+      @if (applied(); as a) {
+        <p class="notice notice--success" role="status">
+          {{ brl(a.amount) }} aplicados em {{ a.name }}.
+          <a routerLink="/carteira">Ver na carteira</a>
+        </p>
+      }
+      @if (applyError(); as e) {
+        <p class="notice notice--error" role="alert">{{ e }}</p>
+      }
       <div class="table-wrap">
         <table class="results">
           <thead>
@@ -109,6 +124,7 @@
               <th scope="col" class="num minor">IR</th>
               <th scope="col" class="num">Líquido</th>
               <th scope="col" class="num">Rendimento</th>
+              <th scope="col"><span class="sr-only">Aplicar</span></th>
             </tr>
           </thead>
           <tbody>
@@ -150,6 +166,17 @@
                   <strong>{{ money(row.simulation.net) }}</strong>
                 </td>
                 <td class="num gain">+{{ money(netYield(row)) }}</td>
+                <td class="apply">
+                  <button
+                    type="button"
+                    class="btn btn--sm"
+                    [disabled]="principal() === null || applying() !== null"
+                    [attr.aria-label]="'Aplicar em ' + row.product.name"
+                    (click)="apply(row.product)"
+                  >
+                    {{ applying() === row.product.id ? 'Aplicando…' : 'Aplicar' }}
+                  </button>
+                </td>
               </tr>
             }
           </tbody>

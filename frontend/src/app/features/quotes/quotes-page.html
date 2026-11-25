@@ -97,7 +97,9 @@
               row.quote.ticker.slice(0, 2)
             }}</span>
             <span class="asset">
-              <span class="ticker">{{ row.quote.ticker }}</span>
+              <a class="ticker" [routerLink]="['/ativo', row.quote.ticker]">{{
+                row.quote.ticker
+              }}</a>
               <span class="name">{{ row.quote.name ?? '' }}</span>
             </span>
           </span>

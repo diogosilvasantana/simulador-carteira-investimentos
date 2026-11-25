@@ -1,15 +1,106 @@
 <section class="home">
-  <header class="intro">
-    <h1>Treine com o mercado de verdade, sem arriscar dinheiro</h1>
-    <p class="intro__lead">
-      Cotações reais da B3 e indexadores oficiais do Banco Central. Nenhuma ordem sai daqui: é tudo
-      simulado, para você praticar até ganhar confiança.
-    </p>
-    <div class="intro__actions">
-      <a class="btn btn--primary" routerLink="/cotacoes">Ver cotações ao vivo</a>
-      <a class="btn" routerLink="/renda-fixa">Simular renda fixa</a>
+  @if (started()) {
+    @let s = portfolio.summary()!;
+    <section class="summary panel" aria-labelledby="summary-title">
+      <div class="summary__head">
+        <h1 id="summary-title">Sua carteira</h1>
+        <a class="btn btn--sm" routerLink="/carteira">Abrir carteira</a>
+      </div>
+      <div class="summary__numbers">
+        <div>
+          <span class="label">Patrimônio</span>
+          <strong class="total num">{{ brl(s.total) }}</strong>
+        </div>
+        <div>
+          <span class="label">Resultado</span>
+          <strong [class]="'num ' + tone(s.result)">
+            {{ signedBrl(s.result) }}
+            @if (s.resultPercent !== null) {
+              <small>({{ percent(s.resultPercent, true) }})</small>
+            }
+          </strong>
+        </div>
+        <div>
+          <span class="label">Caixa</span>
+          <strong class="num">{{ brl(s.cash) }}</strong>
+        </div>
+      </div>
+      @if (allocation().length > 0) {
+        <div class="alloc-bar" role="img" aria-label="Alocação por tipo de ativo">
+          @for (a of allocation(); track a.info.slug) {
+            <span [style.flex-grow]="a.entry.percent" [style.background]="a.info.color"></span>
+          }
+        </div>
+        <ul class="legend">
+          @for (a of allocation(); track a.info.slug) {
+            <li>
+              <span class="dot" [style.background]="a.info.color"></span>
+              {{ a.info.label }} <strong class="num">{{ percent(a.entry.percent) }}</strong>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  } @else {
+    <header class="intro">
+      <h1>Treine com o mercado de verdade, sem arriscar dinheiro</h1>
+      <p class="intro__lead">
+        Cotações reais da B3 e indexadores oficiais do Banco Central. Monte uma carteira em quatro
+        passos: quanto investir, como dividir, quais ativos e a revisão das ordens. Nenhuma ordem
+        sai daqui.
+      </p>
+      <div class="intro__actions">
+        <a class="btn btn--primary" routerLink="/carteira/montar">Montar minha carteira</a>
+        <a class="btn" routerLink="/cotacoes">Ver cotações ao vivo</a>
+      </div>
+    </header>
+  }
+
+  <section class="block" aria-labelledby="market-title">
+    <div class="block__head">
+      <h2 id="market-title">O mercado hoje</h2>
+      <a routerLink="/cotacoes">Todas as cotações</a>
     </div>
-  </header>
+    <div class="movers">
+      @for (g of groups; track g.id) {
+        <section class="panel movers__group" [attr.aria-labelledby]="'movers-' + g.id">
+          <h3 [id]="'movers-' + g.id">{{ g.title }}</h3>
+          @if (market(); as m) {
+            @if (m[g.id].length === 0) {
+              <p class="muted">{{ g.empty }}</p>
+            } @else {
+              <ol>
+                @for (q of m[g.id]; track q.ticker) {
+                  <li>
+                    <a [routerLink]="['/ativo', q.ticker]">
+                      <span
+                        class="mono mono--sm"
+                        [style.background]="typeColor(q.type)"
+                        aria-hidden="true"
+                        >{{ q.ticker.slice(0, 2) }}</span
+                      >
+                      <strong>{{ q.ticker }}</strong>
+                      @if (g.id === 'active') {
+                        <span class="num muted">{{ formatVolume(q.volume) }}</span>
+                      } @else {
+                        <span [class]="'num ' + tone(q.changePercent)">{{
+                          percent(q.changePercent, true)
+                        }}</span>
+                      }
+                    </a>
+                  </li>
+                }
+              </ol>
+            }
+          } @else {
+            @for (i of [1, 2, 3]; track i) {
+              <span class="bone"></span>
+            }
+          }
+        </section>
+      }
+    </div>
+  </section>
 
   <section class="block" aria-labelledby="types-title">
     <h2 id="types-title">Escolha por onde começar</h2>
@@ -17,18 +108,5 @@
       Cada tipo de ativo tem riscos e prazos diferentes. Diversificar é misturar.
     </p>
     <app-type-carousel [tiles]="tiles()" label="Tipos de ativo" />
-  </section>
-
-  <section class="block" aria-labelledby="roadmap-title">
-    <h2 id="roadmap-title">O que já dá para fazer</h2>
-    <ol class="phases">
-      @for (phase of phases(); track phase.name) {
-        <li [class.ready]="phase.ready">
-          <span class="phase__state">{{ phase.ready ? 'Disponível' : 'Em construção' }}</span>
-          <span class="phase__name">{{ phase.name }}</span>
-          <span class="phase__desc">{{ phase.description }}</span>
-        </li>
-      }
-    </ol>
   </section>
 </section>

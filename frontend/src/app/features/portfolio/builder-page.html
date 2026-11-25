@@ -1,0 +1,248 @@
+<section class="page">
+  <header class="page-head">
+    <div>
+      <h1>Montar carteira</h1>
+      <p class="page-head__lead">
+        Quatro passos: quanto investir, como dividir, quais ativos e a revisão. Nada é executado
+        antes de você confirmar.
+      </p>
+    </div>
+    <a class="btn" routerLink="/carteira">Voltar para a carteira</a>
+  </header>
+
+  <ol class="steps" aria-label="Etapas">
+    @for (label of ['Valor', 'Divisão', 'Ativos', 'Revisão']; track label; let i = $index) {
+      <li [class.current]="step() === i + 1" [class.done]="step() > i + 1">
+        <span class="steps__n num">{{ i + 1 }}</span>{{ label }}
+      </li>
+    }
+  </ol>
+
+  @switch (step()) {
+    @case (1) {
+      <section class="panel stage">
+        <h2>Quanto você quer investir?</h2>
+        <label class="field amount">
+          Valor (R$)
+          <input
+            inputmode="decimal"
+            [value]="amountText()"
+            (input)="amountText.set(value($event))"
+            [attr.aria-invalid]="amount() === null"
+          />
+        </label>
+        <p class="hint">
+          Você tem {{ brl(portfolio.summary()?.cash ?? '0') }} em caixa. Se não bastar, o assistente
+          faz um aporte da diferença antes das compras.
+        </p>
+        <div class="nav">
+          <span></span>
+          <button
+            type="button"
+            class="btn btn--primary"
+            [disabled]="amount() === null"
+            (click)="step.set(2)"
+          >
+            Continuar
+          </button>
+        </div>
+      </section>
+    }
+    @case (2) {
+      <section class="panel stage">
+        <h2>Como dividir entre os tipos de ativo</h2>
+        <div class="profiles" role="radiogroup" aria-label="Perfil">
+          @for (p of profiles; track p.id) {
+            <button
+              type="button"
+              role="radio"
+              class="profile"
+              [attr.aria-checked]="profile() === p.id"
+              (click)="applyProfile(p)"
+            >
+              <strong>{{ p.label }}</strong>
+              <span>{{ p.description }}</span>
+              <span class="mini-bar" aria-hidden="true">
+                @for (c of classes; track c.slug) {
+                  @if (p.weights[c.slug] > 0) {
+                    <span [style.flex-grow]="p.weights[c.slug]" [style.background]="c.color"></span>
+                  }
+                }
+              </span>
+            </button>
+          }
+        </div>
+
+        <div class="weights">
+          @for (c of classes; track c.slug) {
+            <label class="weight">
+              <span class="weight__name"
+                ><span class="dot" [style.background]="c.color"></span>{{ c.label }}</span
+              >
+              <input
+                type="range"
+                min="0"
+                max="100"
+                step="5"
+                [value]="weights()[c.slug]"
+                (input)="setWeight(c.slug, value($event))"
+                [style.accent-color]="c.color"
+              />
+              <span class="weight__pct num">{{ weights()[c.slug] }}%</span>
+              <span class="weight__brl num">{{ brl(fromCents(budgetOf(c.slug))) }}</span>
+            </label>
+          }
+        </div>
+        <p [class]="weightSum() === 100 ? 'hint' : 'hint hint--error'" aria-live="polite">
+          Total {{ weightSum() }}%{{ weightSum() === 100 ? '' : ': ajuste até somar 100%.' }}
+        </p>
+        <div class="nav">
+          <button type="button" class="btn" (click)="step.set(1)">Voltar</button>
+          <button
+            type="button"
+            class="btn btn--primary"
+            [disabled]="weightSum() !== 100"
+            (click)="goToAssets()"
+          >
+            Escolher os ativos
+          </button>
+        </div>
+      </section>
+    }
+    @case (3) {
+      <section class="panel stage">
+        <h2>Quais ativos comprar</h2>
+        <p class="hint">
+          Sugerimos os mais negociados de cada tipo: preço confiável e fácil de comprar e vender. O
+          valor de cada tipo é dividido igualmente entre os ativos marcados.
+        </p>
+        @if (loadingAssets()) {
+          <p class="hint" aria-busy="true">Buscando os ativos…</p>
+        }
+        @for (c of activeClasses(); track c.slug) {
+          <fieldset class="group">
+            <legend>
+              <span class="dot" [style.background]="c.color"></span>{{ c.label }}
+              <span class="num muted">{{ brl(fromCents(budgetOf(c.slug))) }}</span>
+            </legend>
+            @if (c.slug === 'renda-fixa') {
+              <div class="options">
+                @for (p of products(); track p.id) {
+                  <label class="option" [class.option--on]="product() === p.id">
+                    <input
+                      type="radio"
+                      name="product"
+                      [checked]="product() === p.id"
+                      (change)="product.set(p.id)"
+                    />
+                    <span
+                      ><strong>{{ p.name }}</strong>
+                      <small
+                        >{{ p.incomeTaxExempt ? 'Isento de IR' : 'IR regressivo' }} ·
+                        {{
+                          p.gracePeriodDays
+                            ? 'carência de ' + p.gracePeriodDays + ' dias'
+                            : 'liquidez diária'
+                        }}</small
+                      ></span
+                    >
+                  </label>
+                }
+              </div>
+            } @else {
+              @let list = candidates()[c.slug] ?? [];
+              @if (!loadingAssets() && list.length === 0) {
+                <p class="hint">
+                  Nenhum ativo de {{ c.label }} com preço agora. Esse valor fica no caixa.
+                </p>
+              }
+              <div class="options">
+                @for (a of list; track a.ticker) {
+                  <label class="option" [class.option--on]="isChosen(c.slug, a.ticker)">
+                    <input
+                      type="checkbox"
+                      [checked]="isChosen(c.slug, a.ticker)"
+                      (change)="toggle(c.slug, a.ticker)"
+                    />
+                    <span class="mono" [style.background]="c.color" aria-hidden="true">{{
+                      a.ticker.slice(0, 2)
+                    }}</span>
+                    <span
+                      ><strong>{{ a.ticker }}</strong
+                      ><small>{{ a.name }}</small></span
+                    >
+                    <span class="num">{{ brl(a.last) }}</span>
+                  </label>
+                }
+              </div>
+            }
+          </fieldset>
+        }
+        <div class="nav">
+          <button type="button" class="btn" (click)="step.set(2)">Voltar</button>
+          <button
+            type="button"
+            class="btn btn--primary"
+            [disabled]="loadingAssets() || lines().length === 0"
+            (click)="step.set(4)"
+          >
+            Revisar
+          </button>
+        </div>
+      </section>
+    }
+    @case (4) {
+      <section class="panel stage">
+        <h2>{{ finished() ? 'Carteira montada' : 'Confira antes de montar' }}</h2>
+        <ul class="review">
+          @for (line of lines(); track line.label; let i = $index) {
+            <li [class]="'review__line review__line--' + (states()[i] ?? 'idle')">
+              <span class="review__state" aria-hidden="true"></span>
+              <span
+                ><strong>{{ line.label }}</strong
+                ><small>{{ errors()[i] ?? line.detail }}</small></span
+              >
+              <span class="num">{{ brl(fromCents(line.totalCents)) }}</span>
+            </li>
+          }
+        </ul>
+        <dl class="totals">
+          <div>
+            <dt>Vai para ativos</dt>
+            <dd class="num">{{ brl(fromCents(plannedCents())) }}</dd>
+          </div>
+          <div>
+            <dt>Fica no caixa (sobras e custos)</dt>
+            <dd class="num">{{ brl(fromCents(budgetCents() - plannedCents())) }}</dd>
+          </div>
+        </dl>
+        <p class="hint">
+          Compras a mercado, no último preço de cada ativo, com os custos da B3. Preços mudam até a
+          execução, então os totais podem variar alguns centavos.
+        </p>
+        <div class="nav">
+          @if (finished()) {
+            <button type="button" class="btn" (click)="step.set(3)">
+              Ajustar e montar de novo
+            </button>
+            <button type="button" class="btn btn--primary" (click)="goToPortfolio()">
+              Ver minha carteira
+            </button>
+          } @else {
+            <button type="button" class="btn" [disabled]="running()" (click)="step.set(3)">
+              Voltar
+            </button>
+            <button
+              type="button"
+              class="btn btn--primary"
+              [disabled]="running()"
+              (click)="execute()"
+            >
+              {{ running() ? 'Montando…' : 'Confirmar e montar' }}
+            </button>
+          }
+        </div>
+      </section>
+    }
+  }
+</section>

@@ -1,0 +1,251 @@
+<section class="page">
+  <header class="page-head">
+    <div>
+      <h1>Carteira</h1>
+      <p class="page-head__lead">
+        Tudo o que você tem, avaliado a preço de mercado. O resultado compara o patrimônio com o que
+        você aportou.
+      </p>
+    </div>
+    <a class="btn btn--primary" routerLink="/carteira/montar">Montar carteira</a>
+  </header>
+
+  @if (portfolio.unavailable()) {
+    <p class="notice notice--error" role="alert">
+      Não deu para carregar a carteira. O backend está rodando?
+    </p>
+  } @else if (!summary()) {
+    <div class="panel loading" aria-busy="true">
+      <span class="bone"></span><span class="bone bone--big"></span>
+    </div>
+  } @else {
+    @let s = summary()!;
+    <section class="overview">
+      <div class="total">
+        <span class="label">Patrimônio simulado</span>
+        <strong class="total__value num">{{ brl(s.total) }}</strong>
+        <span [class]="'result ' + tone(s.result)">
+          {{ signedBrl(s.result) }}
+          @if (s.resultPercent !== null) {
+            <span class="num">({{ percent(s.resultPercent, true) }})</span>
+          }
+          <small>sobre os aportes</small>
+        </span>
+      </div>
+      <dl class="facts">
+        <div>
+          <dt>Aportado</dt>
+          <dd class="num">{{ brl(s.contributed) }}</dd>
+        </div>
+        <div>
+          <dt>Em caixa</dt>
+          <dd class="num">{{ brl(s.cash) }}</dd>
+        </div>
+        <div>
+          <dt>Não realizado</dt>
+          <dd [class]="'num ' + tone(s.unrealizedPnl)">{{ signedBrl(s.unrealizedPnl) }}</dd>
+        </div>
+        <div>
+          <dt>Realizado nas vendas</dt>
+          <dd [class]="'num ' + tone(s.realizedPnl)">{{ signedBrl(s.realizedPnl) }}</dd>
+        </div>
+      </dl>
+      <form class="contribute" (submit)="$event.preventDefault(); contribute()">
+        <label class="field">
+          Aportar (R$)
+          <input inputmode="decimal" [value]="amount()" (input)="amount.set(value($event))" />
+        </label>
+        <button type="submit" class="btn" [disabled]="contributing()">
+          {{ contributing() ? 'Aportando…' : 'Aportar' }}
+        </button>
+      </form>
+    </section>
+    @if (message(); as text) {
+      <p class="notice" role="status">{{ text }}</p>
+    }
+
+    @if (empty()) {
+      <div class="empty">
+        <h2>Sua carteira ainda está vazia</h2>
+        <p>
+          O jeito mais rápido de começar é o assistente: você escolhe quanto quer investir e como
+          dividir entre os tipos de ativo, e ele monta as ordens para você revisar.
+        </p>
+        <a class="btn btn--primary" routerLink="/carteira/montar">Montar minha carteira</a>
+      </div>
+    } @else {
+      @if (allocation().length > 0) {
+        <section class="block" aria-labelledby="alloc-title">
+          <h2 id="alloc-title">Onde está o dinheiro</h2>
+          <div class="alloc-bar" role="img" aria-label="Alocação por tipo de ativo">
+            @for (a of allocation(); track a.info.slug) {
+              <span [style.flex-grow]="a.entry!.percent" [style.background]="a.info.color"></span>
+            }
+          </div>
+          <ul class="legend">
+            @for (a of allocation(); track a.info.slug) {
+              <li>
+                <span class="dot" [style.background]="a.info.color"></span>
+                <span>{{ a.info.label }}</span>
+                <strong class="num">{{ percent(a.entry!.percent) }}</strong>
+                <span class="num muted">{{ brl(a.entry!.value) }}</span>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
+      <section class="block" aria-labelledby="positions-title">
+        <h2 id="positions-title">Seus ativos</h2>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col">Ativo</th>
+                <th scope="col" class="r hide-sm">Qtd.</th>
+                <th scope="col" class="r hide-sm">Preço médio</th>
+                <th scope="col" class="r hide-sm">Último</th>
+                <th scope="col" class="r">Valor</th>
+                <th scope="col" class="r">Resultado</th>
+                <th scope="col" class="r hide-sm">Peso</th>
+                <th scope="col" class="hide-sm"><span class="sr-only">Ações</span></th>
+              </tr>
+            </thead>
+            @for (g of groups(); track g.info.slug) {
+              <tbody>
+                <tr class="group">
+                  <th scope="rowgroup">
+                    <span class="dot" [style.background]="g.info.color"></span> {{ g.info.label }}
+                  </th>
+                  <td class="hide-sm" colspan="3"></td>
+                  <td class="r num">{{ brl(g.value) }}</td>
+                  <td></td>
+                  <td class="r num hide-sm">{{ percent(g.weight) }}</td>
+                  <td class="hide-sm"></td>
+                </tr>
+                @for (p of g.positions; track p.ticker) {
+                  <tr>
+                    <td>
+                      <a class="asset-cell" [routerLink]="['/ativo', p.ticker]">
+                        <span class="mono" [style.background]="g.info.color" aria-hidden="true">{{
+                          p.ticker.slice(0, 2)
+                        }}</span>
+                        <span
+                          ><strong>{{ p.ticker }}</strong
+                          ><small>{{ p.name }}</small></span
+                        >
+                      </a>
+                    </td>
+                    <td class="r num hide-sm">{{ p.quantity }}</td>
+                    <td class="r num muted hide-sm">{{ brl(p.averagePrice) }}</td>
+                    <td class="r num hide-sm">
+                      {{ brl(p.lastPrice) }}
+                      <small [class]="tone(p.changePercent)">{{
+                        percent(p.changePercent, true)
+                      }}</small>
+                    </td>
+                    <td class="r num">{{ brl(p.marketValue) }}</td>
+                    <td [class]="'r num ' + tone(p.unrealizedPnl)">
+                      {{ signedBrl(p.unrealizedPnl) }}
+                      <small>{{ percent(p.unrealizedPnlPercent, true) }}</small>
+                    </td>
+                    <td class="r num muted hide-sm">{{ percent(p.weightPercent) }}</td>
+                    <td class="r hide-sm">
+                      <span class="row-actions">
+                        <button
+                          type="button"
+                          class="btn btn--sm"
+                          (click)="trade.open(p.ticker, 'BUY')"
+                        >
+                          Comprar
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn--sm"
+                          (click)="trade.open(p.ticker, 'SELL')"
+                        >
+                          Vender
+                        </button>
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            }
+            @if (s.fixedIncome.length > 0) {
+              <tbody>
+                <tr class="group">
+                  <th scope="rowgroup">
+                    <span class="dot" style="background: var(--asset-renda-fixa)"></span> Renda fixa
+                  </th>
+                  <td class="hide-sm" colspan="3"></td>
+                  <td></td>
+                  <td></td>
+                  <td class="r num hide-sm">{{ percent(fixedWeight()) }}</td>
+                  <td class="hide-sm"></td>
+                </tr>
+                @for (f of s.fixedIncome; track f.id) {
+                  <tr>
+                    <td>
+                      <span class="asset-cell">
+                        <span
+                          class="mono"
+                          style="background: var(--asset-renda-fixa)"
+                          aria-hidden="true"
+                          >RF</span
+                        >
+                        <span
+                          ><strong>{{ f.name }}</strong
+                          ><small>desde {{ f.start | date: 'dd/MM/yyyy' }}</small></span
+                        >
+                      </span>
+                    </td>
+                    <td class="r num muted hide-sm">—</td>
+                    <td class="r num muted hide-sm">{{ brl(f.principal) }}</td>
+                    <td class="r num muted hide-sm">líquido {{ brl(f.net) }}</td>
+                    <td class="r num">{{ brl(f.gross) }}</td>
+                    @let gain = subtract(f.gross, f.principal);
+                    <td [class]="'r num ' + tone(gain)">{{ signedBrl(gain) }}</td>
+                    <td class="r num muted hide-sm">—</td>
+                    <td class="hide-sm"></td>
+                  </tr>
+                }
+              </tbody>
+            }
+          </table>
+        </div>
+        @if (s.fixedIncome.length > 0) {
+          <p class="note">
+            Renda fixa pelo valor bruto; "líquido" é quanto entraria se resgatasse hoje, já com IR e
+            IOF.
+          </p>
+        }
+      </section>
+
+      @if (s.recentExecutions.length > 0) {
+        <section class="block" aria-labelledby="orders-title">
+          <h2 id="orders-title">Últimas operações</h2>
+          <ul class="history">
+            @for (e of s.recentExecutions; track e.id) {
+              <li>
+                <span [class]="'side side--' + e.side">{{
+                  e.side === 'BUY' ? 'Compra' : 'Venda'
+                }}</span>
+                <strong>{{ e.ticker }}</strong>
+                <span class="num muted">{{ e.quantity }} × {{ brl(e.price) }}</span>
+                <span class="num">{{ brl(e.total) }}</span>
+                <span class="num muted">{{ e.executedAt | date: 'dd/MM HH:mm' }}</span>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+    }
+
+    <footer class="reset">
+      <button type="button" class="btn btn--sm" (click)="reset()">
+        {{ confirmReset() ? 'Clique de novo para apagar tudo e recomeçar' : 'Recomeçar o treino' }}
+      </button>
+    </footer>
+  }
+</section>

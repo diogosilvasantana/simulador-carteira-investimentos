@@ -1,0 +1,149 @@
+<section class="page">
+  <a class="back" routerLink="/cotacoes">← Cotações</a>
+
+  @if (missing()) {
+    <div class="notice notice--error" role="alert">
+      Não encontramos {{ symbol() }} no catálogo. Confira o código ou procure em Cotações.
+    </div>
+  } @else {
+    @let q = quote();
+    <header class="head">
+      <span
+        class="mono mono--lg"
+        [style.background]="typeColor(q?.type ?? null)"
+        aria-hidden="true"
+        >{{ symbol().slice(0, 2) }}</span
+      >
+      <div class="head__name">
+        <h1>{{ symbol() }}</h1>
+        <p>
+          {{ q?.name ?? '' }}<span class="kind">{{ kind() }}</span>
+        </p>
+      </div>
+      <div class="head__price">
+        @for (r of [revision()]; track r) {
+          <strong class="price num">{{ brl(q?.last) }}</strong>
+        }
+        <span [class]="'change change--' + tone(q?.changePercent)">
+          @if (tone(q?.changePercent) !== 'flat') {
+            <span class="change__arrow" aria-hidden="true"></span>
+          }
+          {{ percent(q?.changePercent, true) }} hoje
+        </span>
+      </div>
+      <div class="head__actions">
+        <button type="button" class="btn btn--primary" (click)="trade.open(symbol(), 'BUY')">
+          Comprar
+        </button>
+        <button
+          type="button"
+          class="btn"
+          [disabled]="!position()"
+          (click)="trade.open(symbol(), 'SELL')"
+        >
+          Vender
+        </button>
+        <button
+          type="button"
+          class="icon-btn star"
+          [class.star--on]="watchlist.has(symbol())"
+          [attr.aria-pressed]="watchlist.has(symbol())"
+          [attr.aria-label]="watchlist.has(symbol()) ? 'Tirar do Radar' : 'Pôr no Radar'"
+          [attr.title]="watchlist.has(symbol()) ? 'No seu Radar' : 'Acompanhar no Radar'"
+          (click)="watchlist.toggle(symbol())"
+        >
+          <app-icon name="star" />
+        </button>
+      </div>
+    </header>
+
+    <dl class="stats">
+      <div>
+        <dt>Fechamento anterior</dt>
+        <dd class="num">{{ brl(q?.previousClose) }}</dd>
+      </div>
+      <div>
+        <dt>Compra / venda</dt>
+        <dd class="num">{{ brl(q?.bid) }} / {{ brl(q?.ask) }}</dd>
+      </div>
+      <div>
+        <dt>Volume</dt>
+        <dd class="num">{{ formatVolume(q?.volume ?? null) }}</dd>
+      </div>
+      <div>
+        <dt>Último negócio</dt>
+        <dd class="num">{{ q?.occurredAt ? (q?.occurredAt | date: 'HH:mm:ss') : '—' }}</dd>
+      </div>
+    </dl>
+
+    <section class="panel chart" aria-labelledby="chart-title">
+      <div class="chart__head">
+        <h2 id="chart-title">Preço desde que você abriu a página</h2>
+        <span class="muted num"
+          >{{ pointCount() }} {{ pointCount() === 1 ? 'atualização' : 'atualizações' }}</span
+        >
+      </div>
+      @if (path(); as d) {
+        <svg
+          viewBox="0 0 640 160"
+          preserveAspectRatio="none"
+          role="img"
+          [attr.aria-label]="'Evolução do preço de ' + symbol()"
+        >
+          <path
+            [attr.d]="d"
+            fill="none"
+            [attr.stroke]="tone(q?.changePercent) === 'down' ? 'var(--loss)' : 'var(--gain)'"
+            stroke-width="2"
+            vector-effect="non-scaling-stroke"
+            stroke-linejoin="round"
+          />
+        </svg>
+      } @else {
+        <p class="muted">
+          A linha aparece conforme os preços chegam do MT5. O histórico de dias anteriores chega com
+          os candles.
+        </p>
+      }
+    </section>
+
+    <div class="grid">
+      <section class="panel" aria-labelledby="pos-title">
+        <h2 id="pos-title">Na sua carteira</h2>
+        @if (position(); as p) {
+          <dl class="mine">
+            <div>
+              <dt>Quantidade</dt>
+              <dd class="num">{{ p.quantity }}</dd>
+            </div>
+            <div>
+              <dt>Preço médio</dt>
+              <dd class="num">{{ brl(p.averagePrice) }}</dd>
+            </div>
+            <div>
+              <dt>Valor hoje</dt>
+              <dd class="num">{{ brl(p.marketValue) }}</dd>
+            </div>
+            <div>
+              <dt>Resultado</dt>
+              <dd [class]="'num ' + tone(p.unrealizedPnl)">
+                {{ signedBrl(p.unrealizedPnl) }} ({{ percent(p.unrealizedPnlPercent, true) }})
+              </dd>
+            </div>
+          </dl>
+        } @else {
+          <p class="muted">Você ainda não tem {{ symbol() }}. Compre a partir de 1 unidade.</p>
+        }
+      </section>
+      @if (category(); as c) {
+        <section class="panel" aria-labelledby="about-title">
+          <h2 id="about-title">
+            <span class="dot" [style.background]="c.color"></span> {{ c.label }}
+          </h2>
+          <p class="muted">{{ c.description }}</p>
+          <a [routerLink]="['/cotacoes', c.slug]">Ver todos os {{ c.label }}</a>
+        </section>
+      }
+    </div>
+  }
+</section>

@@ -1,3 +1,4 @@
+import { RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import {
@@ -34,6 +35,7 @@ export const ROW_HEIGHT = 56;
 @Component({
   selector: 'app-quotes-page',
   imports: [
+    RouterLink,
     DatePipe,
     TypeCarousel,
     CdkVirtualScrollViewport,
