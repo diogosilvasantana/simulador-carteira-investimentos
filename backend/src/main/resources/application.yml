@@ -62,19 +62,20 @@ simulador:
         index-percentage: 110
         income-tax-exempt: false
         grace-period-days: 0
-      # Resolução CMN 5.119/2024: LCI e LCA têm carência mínima de 90 dias
+      # Resolução CMN 5.215/2025: prazo mínimo de seis meses para LCI e LCA sem índice de preços.
+      # Seis meses têm de 181 a 184 dias; o maior evita mostrar resgate antes da hora.
       - id: lci-92
         name: LCI 92% do CDI
         kind: LCI
         index-percentage: 92
         income-tax-exempt: true
-        grace-period-days: 90
+        grace-period-days: 184
       - id: lca-90
         name: LCA 90% do CDI
         kind: LCA
         index-percentage: 90
         income-tax-exempt: true
-        grace-period-days: 90
+        grace-period-days: 184
     # Tabelas versionadas pela data de vigência (ADR-011). Mudou a lei? Acrescente uma tabela com
     # o novo valid-from em vez de editar a antiga.
     taxes:
