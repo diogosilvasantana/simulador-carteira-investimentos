@@ -1,13 +1,28 @@
 # Perfil para rodar tudo no PC: ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
-# O dev.cmd roda sem Docker: enquanto nenhum módulo grava no banco, o perfil local fica sem ele.
-# Quem criar o primeiro repositório JPA remove estas exclusões.
+# Banco em arquivo (H2), para o dev.cmd não depender de Docker (ADR-013). Os dados ficam fora do
+# repositório, para nunca irem parar num commit.
+server:
+  # Sem login ainda: ninguém mais na rede pode abrir as finanças pessoais.
+  address: 127.0.0.1
+
 spring:
   autoconfigure:
     exclude:
-      - org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration
+      # A estrutura de eventos do Modulith só existe no PostgreSQL.
       - org.springframework.modulith.events.jdbc.JdbcEventPublicationAutoConfiguration
       - org.springframework.modulith.events.config.EventPublicationAutoConfiguration
+  datasource:
+    url: jdbc:h2:file:${simulador.local.data-dir}/simulador
+    username: sa
+    password: ""
+  flyway:
+    locations: classpath:db/migration/common
+
 simulador:
+  local:
+    data-dir: ${SIMULADOR_DATA_DIR:${user.home}/.simulador-carteira}
+  personal-finance:
+    enabled: true
   ingest:
     token: ${INGEST_TOKEN:local-dev-token}
 

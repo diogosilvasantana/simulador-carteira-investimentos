@@ -16,5 +16,6 @@ Formato: contexto, opções consideradas, decisão e consequências. Um ADR acei
 | [ADR-010](0010-catalogo-de-ativos-pela-especificacao-b3.md) | Catálogo de ativos pela especificação B3 do MT5, enriquecido por fontes oficiais | Aceito |
 | [ADR-011](0011-renda-fixa-simulada-com-indexadores-oficiais.md) | Renda fixa simulada com indexadores oficiais | Aceito |
 | [ADR-012](0012-carteira-simulada-com-ordens-a-mercado.md) | Carteira simulada com ordens a mercado, em memória | Aceito |
+| [ADR-013](0013-financas-pessoais-no-modo-local.md) | Finanças pessoais no modo local, com banco em arquivo | Aceito |
 
 Modelo para novos ADRs: [template.md](template.md)

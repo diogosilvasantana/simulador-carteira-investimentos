@@ -1,0 +1,223 @@
+<section class="today">
+  <header class="page-head">
+    <div>
+      <h1>Hoje</h1>
+      <p class="page-head__lead">O retrato do seu mês e o que vem primeiro.</p>
+    </div>
+  </header>
+
+  @if (error(); as message) {
+    <p class="notice notice--warning" role="alert">{{ message }}</p>
+  }
+
+  @if (snapshot(); as s) {
+    <section class="stage" aria-labelledby="stage-title">
+      <p class="stage__label">Sua etapa</p>
+      <h2 id="stage-title">{{ stage().title }}</h2>
+      <p>{{ stage().text }}</p>
+    </section>
+
+    <dl class="numbers">
+      <div>
+        <dt>{{ isNegative(s.available) ? 'Falta no mês' : 'Sobra no mês' }}</dt>
+        <dd class="num" [class.down]="isNegative(s.available)">{{ brl(s.available) }}</dd>
+      </div>
+      <div>
+        <dt>Renda</dt>
+        <dd class="num">{{ brl(s.income) }}</dd>
+      </div>
+      <div>
+        <dt>Essenciais</dt>
+        <dd class="num">{{ brl(s.essentials) }}</dd>
+      </div>
+      <div>
+        <dt>Outros gastos</dt>
+        <dd class="num">{{ brl(s.others) }}</dd>
+      </div>
+      <div>
+        <dt>Parcelas conhecidas</dt>
+        <dd class="num">{{ brl(s.installments) }}</dd>
+      </div>
+      <div>
+        <dt>Dívida total</dt>
+        <dd class="num">{{ brl(s.totalDebt) }}</dd>
+      </div>
+    </dl>
+
+    @if (s.incompleteDebts > 0) {
+      <p class="notice notice--warning">
+        {{ s.incompleteDebts }} dívida(s) sem taxa ou parcela. A conta do mês pode estar melhor do
+        que a realidade.
+      </p>
+    }
+
+    @if (top().length > 0) {
+      <section class="block" aria-labelledby="priority-title">
+        <h2 id="priority-title">Olhe primeiro</h2>
+        <ol class="priorities">
+          @for (debt of top(); track debt.id) {
+            <li>
+              <strong>{{ debt.creditor }}</strong>
+              <span>{{
+                debt.overdue && debt.collateral
+                  ? 'Vencida e com bem em garantia'
+                  : debt.overdue
+                    ? 'Vencida'
+                    : debt.monthlyRatePercent === null
+                      ? 'Descubra a taxa'
+                      : rate(debt.monthlyRatePercent) + '% ao mês'
+              }}</span>
+            </li>
+          }
+        </ol>
+      </section>
+    }
+
+    <section class="block" aria-labelledby="budget-title">
+      <h2 id="budget-title">Orçamento da casa</h2>
+      <form class="form" (submit)="$event.preventDefault(); addItem()">
+        <label class="field">
+          Nome
+          <input
+            name="itemName"
+            maxlength="120"
+            [value]="itemName()"
+            (input)="itemName.set(value($event))"
+          />
+        </label>
+        <label class="field">
+          Tipo
+          <select name="itemKind" [value]="itemKind()" (change)="itemKind.set(kind($event))">
+            @for (kind of kinds; track kind) {
+              <option [value]="kind">{{ kindLabels[kind] }}</option>
+            }
+          </select>
+        </label>
+        <label class="field">
+          Valor por mês (R$)
+          <input
+            name="itemAmount"
+            inputmode="decimal"
+            [value]="itemAmount()"
+            (input)="itemAmount.set(value($event))"
+          />
+        </label>
+        <button class="btn btn--primary" type="submit" [disabled]="!validItem() || saving()">
+          Adicionar
+        </button>
+      </form>
+      <p class="hint">Informe a renda antes do consignado; a parcela dele entra nas dívidas.</p>
+      <ul class="rows">
+        @for (item of s.items; track item.id) {
+          <li>
+            <span
+              ><strong>{{ item.name }}</strong> <small>{{ kindLabels[item.kind] }}</small></span
+            >
+            <span class="num">{{ brl(item.amount) }}</span>
+            <button
+              class="btn btn--sm"
+              type="button"
+              [disabled]="saving()"
+              [attr.aria-label]="'Remover ' + item.name"
+              (click)="remove('budget-items', item.id)"
+            >
+              {{ confirming() === 'budget-items/' + item.id ? 'Confirmar' : 'Remover' }}
+            </button>
+          </li>
+        } @empty {
+          <li class="hint">Nenhum item ainda.</li>
+        }
+      </ul>
+    </section>
+
+    <section class="block" aria-labelledby="debts-title">
+      <h2 id="debts-title">Dívidas</h2>
+      <form class="form" (submit)="$event.preventDefault(); addDebt()">
+        <label class="field">
+          Credor
+          <input
+            name="creditor"
+            maxlength="120"
+            [value]="creditor()"
+            (input)="creditor.set(value($event))"
+          />
+        </label>
+        <label class="field">
+          Saldo (R$)
+          <input
+            name="balance"
+            inputmode="decimal"
+            [value]="balance()"
+            (input)="balance.set(value($event))"
+          />
+        </label>
+        <label class="field">
+          Juros ao mês (%), se souber
+          <input
+            name="monthlyRate"
+            inputmode="decimal"
+            [value]="monthlyRate()"
+            (input)="monthlyRate.set(value($event))"
+          />
+        </label>
+        <label class="field">
+          Parcela (R$), se souber
+          <input
+            name="installment"
+            inputmode="decimal"
+            [value]="installment()"
+            (input)="installment.set(value($event))"
+          />
+        </label>
+        <label class="check">
+          <input
+            type="checkbox"
+            name="overdue"
+            [checked]="overdue()"
+            (change)="overdue.set(checked($event))"
+          />
+          Vencida
+        </label>
+        <label class="check">
+          <input
+            type="checkbox"
+            name="collateral"
+            [checked]="collateral()"
+            (change)="collateral.set(checked($event))"
+          />
+          Bem em garantia
+        </label>
+        <button class="btn btn--primary" type="submit" [disabled]="!validDebt() || saving()">
+          Adicionar
+        </button>
+      </form>
+      <ul class="rows">
+        @for (debt of s.debts; track debt.id) {
+          <li>
+            <span
+              ><strong>{{ debt.creditor }}</strong>
+              <small
+                >{{ debt.overdue ? 'Vencida' : 'Em dia' }} · parcela
+                {{ brl(debt.installment) }}</small
+              ></span
+            >
+            <span class="num">{{ brl(debt.balance) }}</span>
+            <button
+              class="btn btn--sm"
+              type="button"
+              [disabled]="saving()"
+              [attr.aria-label]="'Remover ' + debt.creditor"
+              (click)="remove('debts', debt.id)"
+            >
+              {{ confirming() === 'debts/' + debt.id ? 'Confirmar' : 'Remover' }}
+            </button>
+          </li>
+        } @empty {
+          <li class="hint">Nenhuma dívida cadastrada.</li>
+        }
+      </ul>
+    </section>
+  } @else if (error() === null) {
+    <p class="hint" role="status">Carregando…</p>
+  }
+</section>

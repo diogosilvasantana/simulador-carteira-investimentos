@@ -2,6 +2,11 @@ import { Routes } from '@angular/router';
 
 export const routes: Routes = [
   { path: '', loadComponent: () => import('./features/home/home').then((m) => m.Home) },
+  {
+    path: 'hoje',
+    title: 'Hoje',
+    loadComponent: () => import('./features/today/today-page').then((m) => m.TodayPage),
+  },
   { path: 'cotacoes', pathMatch: 'full', redirectTo: 'cotacoes/acoes' },
   {
     path: 'cotacoes/:categoria',

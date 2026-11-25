@@ -45,7 +45,11 @@
     } @else {
       <span></span>
     }
-    <span class="sim" title="Nenhuma ordem chega à B3">SIMULADO</span>
+    @if (onPersonal()) {
+      <span class="sim" title="Dados guardados só neste computador">DADOS PESSOAIS</span>
+    } @else {
+      <span class="sim" title="Nenhuma ordem chega à B3">SIMULADO</span>
+    }
   </header>
   <main class="content">
     <router-outlet />

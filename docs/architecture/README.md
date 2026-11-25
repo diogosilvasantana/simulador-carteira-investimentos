@@ -97,6 +97,7 @@ flowchart LR
 | `corporateactions` | Proventos, desdobramentos, grupamentos | `DividendPaid`, `SplitApplied` | `PositionChanged` |
 | `fixedincome` | Indexadores (CDI, Selic, IPCA), renda fixa simulada, IR e IOF ([ADR-011](../adr/0011-renda-fixa-simulada-com-indexadores-oficiais.md)) | `IndexRatesUpdated` | — |
 | `analytics` | Rentabilidade (TWR), benchmarks, rebalanceamento | — | `PositionChanged`, `CashMoved`, `QuoteUpdated` |
+| `personalfinance` | Orçamento da casa, dívidas e prioridades, só no modo local ([ADR-013](../adr/0013-financas-pessoais-no-modo-local.md)) | — | — |
 | `shared` | Tipos comuns (`Money`, `Ticker`) | — | — |
 
 Dentro de cada módulo: `domain` (Java puro) · `application` (casos de uso, portas) ·

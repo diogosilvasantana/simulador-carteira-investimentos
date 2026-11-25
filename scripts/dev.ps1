@@ -127,7 +127,7 @@ Start-DevWindow 'Simulador - backend' (Join-Path $root 'backend') (
   "`"-Dspring-boot.run.arguments=--server.port=$Port`"")
 # 200 basta: o actuator responde 503 quando algo não está saudável. Não dá para ler o corpo, porque
 # o PowerShell 5.1 trata o tipo application/vnd.spring-boot.actuator.v3+json como binário.
-$healthy = Wait-Url "http://localhost:$Port/actuator/health" 600 { param($r) $r.StatusCode -eq 200 }
+$healthy = Wait-Url "http://127.0.0.1:$Port/actuator/health" 600 { param($r) $r.StatusCode -eq 200 }
 if (-not $healthy) { Fail 'O backend não respondeu em 10 minutos. Veja a janela "Simulador - backend".' }
 Write-Ok "Backend no ar: http://localhost:$Port"
 
@@ -152,7 +152,7 @@ if (-not $NoBridge) {
   Start-DevWindow 'Simulador - ponte' $bridge (
     "& '$python' -m pip install --quiet --disable-pip-version-check -e '$extras'; " +
     "`$env:BRIDGE_INGEST_TOKEN = '$ingestToken'; " +
-    "& '$python' -m mt5_bridge --source $Source --symbols $symbolList --url ws://localhost:$Port/ingest")
+    "& '$python' -m mt5_bridge --source $Source --symbols $symbolList --url ws://127.0.0.1:$Port/ingest")
 }
 
 Write-Step 'Esperando o frontend compilar'

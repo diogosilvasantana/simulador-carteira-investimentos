@@ -35,6 +35,7 @@ export class App {
   // Só telas com backend de verdade entram no menu.
   protected readonly items: readonly NavItem[] = [
     { path: '/', label: 'Início', icon: 'home', exact: true },
+    { path: '/hoje', label: 'Hoje', icon: 'today', exact: false },
     { path: '/carteira', label: 'Carteira', icon: 'wallet', exact: false },
     { path: '/cotacoes', label: 'Cotações', icon: 'quotes', exact: false },
     { path: '/radar', label: 'Radar', icon: 'radar', exact: false },
@@ -64,6 +65,9 @@ export class App {
   protected readonly onQuotes = computed(() =>
     ['/cotacoes', '/ativo'].some((prefix) => this.url().startsWith(prefix)),
   );
+
+  // Aqui os valores são da vida real: o selo de simulado enganaria.
+  protected readonly onPersonal = computed(() => this.url().startsWith('/hoje'));
 
   constructor() {
     effect(() => writeCollapsed(this.collapsed()));

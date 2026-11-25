@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 
 // Ícones de traço desenhados para o produto: 24 × 24, traço 1,75, pontas arredondadas.
 const PATHS = {
+  today: 'M5 4h14a1 1 0 0 1 1 1v15H4V5a1 1 0 0 1 1-1ZM8 2v4M16 2v4M4 10h16M9 15l2 2 4-4',
   home: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z',
   quotes: 'M4 19V9m6 10V5m6 14v-8m6 8H2',
   fixedIncome: 'M3 9 12 4l9 5M5 10v8m4.5-8v8m5-8v8M19 10v8M3 20h18',
