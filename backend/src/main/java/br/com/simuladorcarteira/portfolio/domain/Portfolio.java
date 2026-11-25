@@ -95,22 +95,21 @@ public final class Portfolio {
       throw new InsufficientCashException(quote.total(), cash);
     }
     cash = cash.minus(quote.total());
-    positions.put(
-        ticker,
-        positions
-            .getOrDefault(ticker, Position.open(ticker, name, assetClass))
-            .buy(quantity, quote.total()));
+    Position current = positions.get(ticker);
+    Position base = current != null ? current : Position.open(ticker, name, assetClass);
+    positions.put(ticker, base.buy(quantity, quote.total()));
     return record(quote, at);
   }
 
   public Execution sell(Ticker ticker, long quantity, Money price, TradingCosts costs, Instant at) {
     OrderQuote quote = quote(OrderSide.SELL, ticker, quantity, price, costs, at);
-    long available = position(ticker).map(Position::quantity).orElse(0L);
-    if (quantity > available) {
+    Position held = positions.get(ticker);
+    long available = held == null ? 0L : held.quantity();
+    if (held == null || quantity > available) {
       throw new InsufficientPositionException(ticker, quantity, available);
     }
     cash = cash.plus(quote.total());
-    positions.put(ticker, positions.get(ticker).sell(quantity, quote.total()));
+    positions.put(ticker, held.sell(quantity, quote.total()));
     return record(quote, at);
   }
 
