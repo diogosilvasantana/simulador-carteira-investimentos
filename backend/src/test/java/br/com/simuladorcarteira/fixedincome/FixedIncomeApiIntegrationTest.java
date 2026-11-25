@@ -3,6 +3,7 @@ package br.com.simuladorcarteira.fixedincome;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import br.com.simuladorcarteira.PostgresTestConfiguration;
+import br.com.simuladorcarteira.TestLogin;
 import br.com.simuladorcarteira.fixedincome.application.IndexRateRepository;
 import br.com.simuladorcarteira.fixedincome.domain.IndexRate;
 import br.com.simuladorcarteira.fixedincome.domain.RateIndex;
@@ -15,7 +16,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.web.client.RestClient;
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
@@ -37,7 +37,7 @@ class FixedIncomeApiIntegrationTest {
             new IndexRate(RateIndex.CDI, MONDAY.plusDays(1), new BigDecimal("0.055131"))));
 
     String body =
-        RestClient.create("http://localhost:" + port)
+        TestLogin.client(port)
             .post()
             .uri("/api/fixed-income/simulations")
             .contentType(MediaType.APPLICATION_JSON)
@@ -60,11 +60,7 @@ class FixedIncomeApiIntegrationTest {
     rates.saveAll(List.of(new IndexRate(RateIndex.SELIC_TARGET, MONDAY, new BigDecimal("14.25"))));
 
     String body =
-        RestClient.create("http://localhost:" + port)
-            .get()
-            .uri("/api/fixed-income/indexes")
-            .retrieve()
-            .body(String.class);
+        TestLogin.client(port).get().uri("/api/fixed-income/indexes").retrieve().body(String.class);
 
     assertThat(body).contains("\"index\":\"SELIC_TARGET\"").contains("\"unit\":\"% ao ano\"");
   }
@@ -72,7 +68,7 @@ class FixedIncomeApiIntegrationTest {
   @Test
   void shouldListTheModelProductsFromConfiguration() {
     String body =
-        RestClient.create("http://localhost:" + port)
+        TestLogin.client(port)
             .get()
             .uri("/api/fixed-income/products")
             .retrieve()

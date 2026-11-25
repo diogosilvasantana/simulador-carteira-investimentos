@@ -1,0 +1,37 @@
+.login {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  padding: var(--space-6);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: min(100%, 380px);
+  padding: var(--space-8);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface-1);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-size: 24px;
+}
+
+.lead {
+  margin-top: calc(var(--space-2) * -1);
+  color: var(--text-muted);
+  font-size: 13px;
+}

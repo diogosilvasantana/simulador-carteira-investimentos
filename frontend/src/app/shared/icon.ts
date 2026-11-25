@@ -7,6 +7,7 @@ const PATHS = {
   fixedIncome: 'M3 9 12 4l9 5M5 10v8m4.5-8v8m5-8v8M19 10v8M3 20h18',
   collapse: 'M15 6l-6 6 6 6',
   expand: 'M9 6l6 6-6 6',
+  logout: 'M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l-5-5 5-5M5 12h11',
   search: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zm9 16-4.3-4.3',
   arrowUp: 'M12 19V5m-6 6 6-6 6 6',
   arrowDown: 'M12 5v14m6-6-6 6-6-6',

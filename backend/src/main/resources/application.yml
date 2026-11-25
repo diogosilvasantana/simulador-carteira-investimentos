@@ -4,6 +4,9 @@ spring:
   threads:
     virtual:
       enabled: true
+  flyway:
+    # SQL comum aos dois bancos e, à parte, o que só existe em um deles (ADR-013)
+    locations: classpath:db/migration/common,classpath:db/migration/{vendor}
   jpa:
     # A sessão não fica aberta durante a resposta; o schema é só do Flyway e o Hibernate confere.
     open-in-view: false
@@ -14,6 +17,18 @@ spring:
       jdbc:
         schema-initialization:
           enabled: false
+
+server:
+  # Atrás do Traefik do Coolify e do nginx: o IP real do cliente vem do X-Forwarded-For, lido só
+  # de proxies da rede interna, para o freio do login não ser enganado.
+  forward-headers-strategy: native
+  servlet:
+    session:
+      timeout: 2h
+      cookie:
+        http-only: true
+        secure: ${SESSION_COOKIE_SECURE:true}
+        same-site: strict
 
 management:
   endpoints:
@@ -26,6 +41,10 @@ management:
         enabled: true
 
 simulador:
+  security:
+    # Único usuário (ADR-014). Sem as duas variáveis o backend não sobe.
+    username: ${APP_USERNAME:}
+    password-hash: ${APP_PASSWORD_HASH:}
   # Custos de negociação versionados por data: emolumentos e liquidação da B3 sobre o volume.
   # A corretagem é zero, como na maioria das corretoras para pessoa física.
   portfolio:
