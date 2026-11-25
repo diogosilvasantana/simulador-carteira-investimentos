@@ -18,7 +18,12 @@ record IndexRateMessage(
           case SELIC_TARGET -> "% ao ano";
           case IPCA -> "% no mês";
         };
+    BigDecimal annual = rate.annualizedPercent();
     return new IndexRateMessage(
-        rate.index().name(), rate.date(), rate.percent().toPlainString(), unit);
+        rate.index().name(),
+        rate.date(),
+        rate.percent().toPlainString(),
+        unit,
+        annual == null ? null : annual.toPlainString());
   }
 }
