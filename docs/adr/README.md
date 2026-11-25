@@ -13,5 +13,6 @@ Formato: contexto, opções consideradas, decisão e consequências. Um ADR acei
 | [ADR-007](0007-monorepo.md) | Monorepo | Aceito |
 | [ADR-008](0008-gitflow-com-staging-e-releases.md) | Gitflow com ambiente de staging e releases versionadas | Aceito |
 | [ADR-009](0009-maven-como-ferramenta-de-build.md) | Maven como ferramenta de build do backend | Aceito |
+| [ADR-011](0011-renda-fixa-simulada-com-indexadores-oficiais.md) | Renda fixa simulada com indexadores oficiais | Aceito |
 
 Modelo para novos ADRs: [template.md](template.md)

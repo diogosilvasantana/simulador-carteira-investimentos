@@ -83,6 +83,10 @@
 - name: "module: corporateactions"
   color: "ededed"
   description: "Proventos e eventos societários"
+- name: "module: fixedincome"
+  color: "ededed"
+  description: "Renda fixa e indexadores"
+  aliases: ["fixedincome"]
 - name: "module: analytics"
   color: "ededed"
   description: "Rentabilidade e rebalanceamento"
