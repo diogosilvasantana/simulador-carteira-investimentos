@@ -1,9 +1,18 @@
 <section class="quotes">
   <header class="quotes__header">
     <h1>Cotações</h1>
-    <span class="status" [class]="'status status--' + stream.state()">
+    <span [class]="'status status--' + stream.state()">
       {{ stateLabel[stream.state()] }}
     </span>
+    <span class="count">{{ visibleRows().length }} de {{ store.rows().length }} ativos</span>
+    <input
+      #search
+      class="search"
+      type="search"
+      placeholder="Buscar ativo"
+      aria-label="Buscar ativo"
+      (input)="query.set(search.value)"
+    />
   </header>
 
   @if (store.rows().length === 0) {
@@ -14,29 +23,43 @@
     <table>
       <thead>
         <tr>
-          <th scope="col">Ativo</th>
+          <th scope="col" [attr.aria-sort]="ariaSort('ticker')">
+            <button type="button" class="sort" (click)="sortBy('ticker')">Ativo</button>
+          </th>
           <th scope="col" class="num">Último</th>
+          <th scope="col" class="num" [attr.aria-sort]="ariaSort('change')">
+            <button type="button" class="sort" (click)="sortBy('change')">Variação</button>
+          </th>
           <th scope="col" class="num">Compra</th>
           <th scope="col" class="num">Venda</th>
+          <th scope="col" class="num">Fech. anterior</th>
           <th scope="col" class="num">Volume</th>
           <th scope="col">Horário</th>
           <th scope="col">Fonte</th>
         </tr>
       </thead>
       <tbody>
-        @for (row of store.rows(); track row.quote.ticker) {
+        @for (row of visibleRows(); track row.quote.ticker) {
           <tr>
             <th scope="row">{{ row.quote.ticker }}</th>
             @for (revision of [row.revision]; track revision) {
-              <td class="num last" [class]="'num last last--' + row.direction">
+              <td [class]="'num last last--' + row.direction">
                 {{ formatPrice(row.quote.last) }}
               </td>
             }
+            <td [class]="changeClass(row.quote.changePercent)">
+              {{ formatChange(row.quote.changePercent) }}
+            </td>
             <td class="num">{{ formatPrice(row.quote.bid) }}</td>
             <td class="num">{{ formatPrice(row.quote.ask) }}</td>
+            <td class="num">{{ formatPrice(row.quote.previousClose) }}</td>
             <td class="num">{{ row.quote.volume }}</td>
             <td>{{ row.quote.occurredAt | date: 'HH:mm:ss' }}</td>
             <td>{{ sourceLabel[row.quote.source] }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="9" class="empty">Nenhum ativo com “{{ query() }}”.</td>
           </tr>
         }
       </tbody>

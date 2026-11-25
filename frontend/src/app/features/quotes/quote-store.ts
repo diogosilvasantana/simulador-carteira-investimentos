@@ -19,18 +19,28 @@ export class QuoteStore {
   }
 
   apply(quote: Quote): void {
+    this.applyAll([quote]);
+  }
+
+  /** Aplica um lote de uma vez: com centenas de ativos, copiar o mapa a cada tick pesa. */
+  applyAll(quotes: readonly Quote[]): void {
+    if (quotes.length === 0) {
+      return;
+    }
     this.byTicker.update((current) => {
-      const previous = current.get(quote.ticker);
-      // Ticks podem chegar fora de ordem na reconexão; o mais antigo é descartado.
-      if (previous && quote.occurredAt < previous.quote.occurredAt) {
-        return current;
-      }
       const next = new Map(current);
-      next.set(quote.ticker, {
-        quote,
-        direction: previous ? directionOf(previous.quote.last, quote.last) : 'flat',
-        revision: (previous?.revision ?? 0) + 1,
-      });
+      for (const quote of quotes) {
+        const previous = next.get(quote.ticker);
+        // Ticks podem chegar fora de ordem na reconexão; o mais antigo é descartado.
+        if (previous && quote.occurredAt < previous.quote.occurredAt) {
+          continue;
+        }
+        next.set(quote.ticker, {
+          quote,
+          direction: previous ? directionOf(previous.quote.last, quote.last) : 'flat',
+          revision: (previous?.revision ?? 0) + 1,
+        });
+      }
       return next;
     });
   }

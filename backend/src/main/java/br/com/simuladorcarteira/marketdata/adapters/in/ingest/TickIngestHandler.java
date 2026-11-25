@@ -70,6 +70,7 @@ class TickIngestHandler extends TextWebSocketHandler {
         Money.brl(required(message.last(), "last")),
         moneyOrNull(message.bid()),
         moneyOrNull(message.ask()),
+        moneyOrNull(message.previousClose()),
         message.volume(),
         Instant.parse(required(message.occurredAt(), "occurred_at")),
         TickSource.valueOf(Objects.requireNonNullElse(message.source(), "LIVE")));
