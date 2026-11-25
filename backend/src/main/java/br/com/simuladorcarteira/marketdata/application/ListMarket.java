@@ -4,10 +4,12 @@ import br.com.simuladorcarteira.marketdata.domain.Asset;
 import br.com.simuladorcarteira.marketdata.domain.AssetCategory;
 import br.com.simuladorcarteira.marketdata.domain.AssetQuote;
 import br.com.simuladorcarteira.marketdata.domain.Tick;
+import br.com.simuladorcarteira.shared.Ticker;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 /** Caso de uso: fotografia do mercado para a tela carregar antes do primeiro lote em tempo real. */
@@ -37,6 +39,16 @@ public class ListMarket {
         .map(this::withTick)
         .sorted(BY_TICKER)
         .toList();
+  }
+
+  /** Um ativo só, para a página do ativo; vazio se nem o catálogo nem o mercado o conhecem. */
+  public Optional<AssetQuote> quote(Ticker ticker) {
+    Optional<Asset> asset = assets.findByTicker(ticker);
+    Optional<Tick> tick = quotes.findByTicker(ticker);
+    if (asset.isEmpty() && tick.isEmpty()) {
+      return Optional.empty();
+    }
+    return Optional.of(new AssetQuote(ticker, asset.orElse(null), tick.orElse(null)));
   }
 
   /** Quantos ativos há em cada categoria, para as abas mostrarem o total. */
