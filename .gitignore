@@ -34,3 +34,6 @@ mt5-bridge/*.csv
 
 # Estado do dev.cmd (processos abertos)
 .dev/
+
+# Logs locais (ex.: backend/run.log do spring-boot:run)
+*.log
