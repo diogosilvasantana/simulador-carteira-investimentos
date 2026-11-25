@@ -1,0 +1,116 @@
+:host {
+  position: relative;
+  display: block;
+}
+
+.nav {
+  position: absolute;
+  top: -44px;
+  right: 0;
+  display: flex;
+  gap: var(--space-1);
+
+  button {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+  }
+}
+
+.track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(196px, 1fr);
+  gap: var(--space-3);
+  margin: 0;
+  padding: 2px;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  li {
+    scroll-snap-align: start;
+  }
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  height: 100%;
+  min-height: 144px;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-1);
+  color: var(--text);
+  text-decoration: none;
+  transition:
+    border-color var(--duration-quick) var(--ease-out),
+    background var(--duration-quick) var(--ease-out);
+
+  &:hover {
+    border-color: var(--line-strong);
+    background: var(--surface-2);
+  }
+
+  &--active,
+  &--active:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+}
+
+.tile__mark {
+  width: 24px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.tile__label {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.tile__desc {
+  flex: 1;
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--text-muted);
+}
+
+.tile--active .tile__desc {
+  color: #b9bae6;
+}
+
+.tile__foot {
+  min-height: 16px;
+  font-size: 12px;
+  color: var(--text-subtle);
+}
+
+@media (max-width: 760px) {
+  .nav {
+    display: none;
+  }
+
+  .track {
+    grid-auto-columns: 148px;
+  }
+}

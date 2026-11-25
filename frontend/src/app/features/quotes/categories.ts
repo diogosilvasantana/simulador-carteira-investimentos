@@ -3,16 +3,62 @@ import { AssetType, ListingSegment } from './quote';
 export interface Category {
   readonly slug: string;
   readonly label: string;
+  /** Uma frase para quem está começando entender a classe. */
+  readonly description: string;
+  /** Token de cor da classe no Design System. */
+  readonly color: string;
 }
 
-/** Mesma ordem e identificadores de AssetCategory no backend (ADR-010). */
+/** Mesmos identificadores de AssetCategory no backend (ADR-010). */
 export const CATEGORIES: readonly Category[] = [
-  { slug: 'acoes', label: 'Ações' },
-  { slug: 'fiis', label: 'FIIs' },
-  { slug: 'fiagros', label: 'Fiagros' },
-  { slug: 'etfs', label: 'ETFs' },
-  { slug: 'bdrs', label: 'BDRs' },
+  {
+    slug: 'acoes',
+    label: 'Ações',
+    description: 'Sócio de empresas, com dividendos e valorização.',
+    color: 'var(--asset-acoes)',
+  },
+  {
+    slug: 'fiis',
+    label: 'FIIs',
+    description: 'Renda mensal de imóveis e recebíveis.',
+    color: 'var(--asset-fiis)',
+  },
+  {
+    slug: 'fiagros',
+    label: 'Fiagros',
+    description: 'Fundos do agronegócio negociados na bolsa.',
+    color: 'var(--asset-fiagros)',
+  },
+  {
+    slug: 'etfs',
+    label: 'ETFs',
+    description: 'Um índice inteiro numa cota só.',
+    color: 'var(--asset-etfs)',
+  },
+  {
+    slug: 'bdrs',
+    label: 'BDRs',
+    description: 'Empresas de fora, negociadas em reais.',
+    color: 'var(--asset-bdrs)',
+  },
 ];
+
+/** Cor da classe pelo tipo do ativo, para o monograma do ticker. */
+export function typeColor(type: AssetType | null): string {
+  switch (type) {
+    case 'REAL_ESTATE_FUND':
+      return 'var(--asset-fiis)';
+    case 'AGRIBUSINESS_FUND':
+      return 'var(--asset-fiagros)';
+    case 'ETF':
+      return 'var(--asset-etfs)';
+    case 'BDR':
+    case 'BDR_ETF':
+      return 'var(--asset-bdrs)';
+    default:
+      return 'var(--asset-acoes)';
+  }
+}
 
 export const DEFAULT_CATEGORY = CATEGORIES[0].slug;
 

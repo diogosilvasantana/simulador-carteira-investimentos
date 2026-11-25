@@ -1,47 +1,59 @@
 <section class="quotes">
-  <header class="quotes__header">
-    <h1>Cotações</h1>
-    <span [class]="'status status--' + stream.state()">{{ stateLabel[stream.state()] }}</span>
+  <header class="page-head">
+    <div>
+      <h1>Cotações</h1>
+      <p class="page-head__lead">
+        Preços da B3 ao vivo pelo MetaTrader 5, atualizados a cada meio segundo.
+      </p>
+    </div>
   </header>
 
-  <nav class="tabs" aria-label="Categorias">
-    @for (category of categories; track category.slug) {
-      <a
-        class="tab"
-        [routerLink]="['/cotacoes', category.slug]"
-        routerLinkActive="tab--active"
-        ariaCurrentWhenActive="page"
-      >
-        {{ category.label }}
-        @if (counts()[category.slug] !== undefined) {
-          <span class="tab__count">{{ counts()[category.slug] }}</span>
-        }
-      </a>
-    }
-  </nav>
+  <section class="types" aria-labelledby="types-title">
+    <h2 id="types-title">Tipos de ativo</h2>
+    <app-type-carousel [tiles]="tiles()" [active]="categoria()" label="Tipos de ativo" />
+  </section>
 
   @if (!current()) {
-    <p class="empty">Categoria desconhecida. Escolha uma das abas acima.</p>
+    <p class="notice">Categoria desconhecida. Escolha um tipo de ativo acima.</p>
   } @else {
     <div class="toolbar">
+      <h2 class="toolbar__title">{{ current()!.label }}</h2>
       <span class="count" aria-live="polite">{{ loading() ? 'Carregando…' : countLabel() }}</span>
-      <input
-        #search
-        class="search"
-        type="search"
-        placeholder="Buscar por ticker ou nome"
-        aria-label="Buscar ativo"
-        (input)="query.set(search.value)"
-      />
+      <label class="search">
+        <span class="sr-only">Buscar ativo</span>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zm9 16-4.3-4.3" />
+        </svg>
+        <input
+          #search
+          type="search"
+          placeholder="Ticker ou nome"
+          (input)="query.set(search.value)"
+        />
+      </label>
     </div>
 
     @if (failed()) {
-      <p class="empty">Não deu para carregar a lista agora. As atualizações ao vivo continuam.</p>
-    } @else if (!loading() && store.rows().length === 0) {
-      <p class="empty">
-        Nenhum ativo nesta categoria ainda. Inicie a ponte do MT5 com
-        <code>--symbols all</code> ou o modo sintético.
+      <p class="notice notice--error" role="alert">
+        Não deu para carregar a lista agora. As atualizações ao vivo continuam chegando.
       </p>
+    } @else if (!loading() && store.rows().length === 0) {
+      <div class="empty">
+        <p class="empty__title">Nenhum ativo de {{ current()!.label }} ainda</p>
+        <p>
+          A lista enche quando a ponte do MT5 envia o catálogo. Rode o <code>dev.cmd</code> com o
+          MetaTrader aberto, ou o modo sintético para treinar com o mercado fechado.
+        </p>
+      </div>
     }
 
     <div class="grid" role="table" [attr.aria-label]="'Cotações de ' + current()!.label">
@@ -61,28 +73,54 @@
         >
           <button type="button" class="sort" (click)="sortBy('volume')">Volume</button>
         </span>
-        <span class="cell cell--time" role="columnheader">Horário</span>
+        <span class="cell num cell--time" role="columnheader">Horário</span>
       </div>
+
+      @if (loading()) {
+        <div class="skeleton" aria-hidden="true">
+          @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+            <div class="row">
+              <span class="cell cell--asset"
+                ><span class="bone bone--mono"></span><span class="bone bone--text"></span
+              ></span>
+              <span class="cell num"><span class="bone bone--num"></span></span>
+              <span class="cell num"><span class="bone bone--num"></span></span>
+            </div>
+          }
+        </div>
+      }
 
       <cdk-virtual-scroll-viewport class="viewport" [itemSize]="rowHeight" role="rowgroup">
         <div *cdkVirtualFor="let row of visible(); trackBy: trackByTicker" class="row" role="row">
           <span class="cell cell--asset" role="cell">
-            <span class="ticker">{{ row.quote.ticker }}</span>
-            <span class="name">{{ row.quote.name ?? '' }}</span>
+            <span class="mono" [style.background]="typeColor(row.quote.type)" aria-hidden="true">{{
+              row.quote.ticker.slice(0, 2)
+            }}</span>
+            <span class="asset">
+              <span class="ticker">{{ row.quote.ticker }}</span>
+              <span class="name">{{ row.quote.name ?? '' }}</span>
+            </span>
           </span>
           @for (revision of [row.revision]; track revision) {
-            <span [class]="'cell num last last--' + row.direction" role="cell">
-              {{ formatPrice(row.quote.last) }}
+            <span class="cell num" role="cell">
+              <span [class]="'last last--' + row.direction">{{ formatPrice(row.quote.last) }}</span>
             </span>
           }
-          <span [class]="changeClass(row.quote.changePercent)" role="cell">
-            {{ formatChange(row.quote.changePercent) }}
+          <span class="cell num" role="cell">
+            @let tone = changeTone(row.quote.changePercent);
+            <span [class]="'change change--' + tone">
+              @if (tone !== 'flat') {
+                <span class="change__arrow" aria-hidden="true"></span>
+                <span class="sr-only">{{ tone === 'up' ? 'Alta de' : 'Baixa de' }}</span>
+              }
+              {{ formatChange(row.quote.changePercent) }}
+            </span>
           </span>
           <span class="cell cell--detail" role="cell">{{ detail(row.quote) }}</span>
           <span class="cell num cell--volume" role="cell">{{
             formatVolume(row.quote.volume)
           }}</span>
-          <span class="cell cell--time" role="cell">
+          <span class="cell num cell--time" role="cell">
             {{ row.quote.occurredAt ? (row.quote.occurredAt | date: 'HH:mm:ss') : '—' }}
           </span>
         </div>

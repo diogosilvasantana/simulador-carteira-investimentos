@@ -15,8 +15,8 @@ import {
   CdkVirtualForOf,
   CdkVirtualScrollViewport,
 } from '@angular/cdk/scrolling';
-import { RouterLink, RouterLinkActive } from '@angular/router';
-import { CATEGORIES, LISTING_LABELS, TYPE_LABELS } from './categories';
+import { TypeCarousel, TypeTile } from '../../shared/type-carousel';
+import { CATEGORIES, LISTING_LABELS, TYPE_LABELS, typeColor } from './categories';
 import { formatChange, formatPrice, formatVolume } from './format';
 import { Quote, QuoteRow, compareDecimal } from './quote';
 import { SortKey, visibleRows } from './quote-list';
@@ -35,8 +35,7 @@ export const ROW_HEIGHT = 56;
   selector: 'app-quotes-page',
   imports: [
     DatePipe,
-    RouterLink,
-    RouterLinkActive,
+    TypeCarousel,
     CdkVirtualScrollViewport,
     CdkFixedSizeVirtualScroll,
     CdkVirtualForOf,
@@ -63,6 +62,30 @@ export class QuotesPage {
   protected readonly sortKey = signal<SortKey>('ticker');
   protected readonly descending = signal(false);
 
+  /** Carrossel de tipos: as categorias da bolsa e a renda fixa, que tem tela própria. */
+  protected readonly tiles = computed<TypeTile[]>(() => {
+    const counts = this.counts();
+    const tiles: TypeTile[] = CATEGORIES.map((category) => ({
+      id: category.slug,
+      link: ['/cotacoes', category.slug],
+      label: category.label,
+      description: category.description,
+      color: category.color,
+      footnote: counts[category.slug] === undefined ? undefined : assetCount(counts[category.slug]),
+    }));
+    tiles.splice(1, 0, {
+      id: 'renda-fixa',
+      link: ['/renda-fixa'],
+      label: 'Renda fixa',
+      description: 'Tesouro, CDB, LCI e LCA com IR e IOF calculados.',
+      color: 'var(--asset-renda-fixa)',
+      footnote: 'CDI oficial do Banco Central',
+    });
+    return tiles;
+  });
+
+  protected readonly typeColor = typeColor;
+
   protected readonly current = computed(() =>
     CATEGORIES.find((category) => category.slug === this.categoria()),
   );
@@ -74,12 +97,6 @@ export class QuotesPage {
       descending: this.descending(),
     }),
   );
-
-  protected readonly stateLabel = {
-    connected: 'Ao vivo',
-    connecting: 'Conectando…',
-    disconnected: 'Desconectado',
-  } as const;
 
   protected readonly formatPrice = formatPrice;
   protected readonly formatChange = formatChange;
@@ -150,13 +167,12 @@ export class QuotesPage {
     return [type, listing].filter(Boolean).join(' · ') || '—';
   }
 
-  protected changeClass(value: string | null): string {
+  protected changeTone(value: string | null): 'up' | 'down' | 'flat' {
     if (value === null) {
-      return 'cell num change';
+      return 'flat';
     }
     const diff = compareDecimal(value, '0');
-    const tone = diff > 0 ? ' change--up' : diff < 0 ? ' change--down' : '';
-    return `cell num change${tone}`;
+    return diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat';
   }
 
   protected countLabel(): string {
@@ -165,4 +181,8 @@ export class QuotesPage {
     const noun = total === 1 ? 'ativo' : 'ativos';
     return shown === total ? `${total} ${noun}` : `${shown} de ${total} ${noun}`;
   }
+}
+
+function assetCount(count: number): string {
+  return `${count.toLocaleString('pt-BR')} ${count === 1 ? 'ativo' : 'ativos'}`;
 }
