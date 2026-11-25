@@ -34,6 +34,9 @@ Use sempre estes nomes no código. Se um conceito novo surgir, adicione-o aqui e
 | Indexador (CDI, Selic, IPCA) | `RateIndex` |
 | Taxa do indexador num dia | `IndexRate` |
 | Percentual do indexador (ex.: 105% do CDI) | `indexPercentage` |
+| Produto de renda fixa (CDB, LCI, LCA, Tesouro) | `FixedIncomeProduct` / `ProductKind` |
+| Carência | `gracePeriodDays` |
+| Taxa ao ano | `annualizedPercent` |
 | Resgate | `Redemption` |
 | Imposto de renda / IOF | `IncomeTax` / `Iof` |
 | Aporte | `Contribution` |

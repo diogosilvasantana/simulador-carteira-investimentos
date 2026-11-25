@@ -8,5 +8,11 @@ export const routes: Routes = [
     title: 'Cotações',
     loadComponent: () => import('./features/quotes/quotes-page').then((m) => m.QuotesPage),
   },
+  {
+    path: 'renda-fixa',
+    title: 'Renda fixa',
+    loadComponent: () =>
+      import('./features/fixed-income/fixed-income-page').then((m) => m.FixedIncomePage),
+  },
   { path: '**', redirectTo: '' },
 ];

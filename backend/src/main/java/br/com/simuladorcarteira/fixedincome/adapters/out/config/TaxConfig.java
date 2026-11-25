@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableConfigurationProperties(TaxProperties.class)
+@EnableConfigurationProperties({TaxProperties.class, ProductProperties.class})
 class TaxConfig {
 
   @Bean

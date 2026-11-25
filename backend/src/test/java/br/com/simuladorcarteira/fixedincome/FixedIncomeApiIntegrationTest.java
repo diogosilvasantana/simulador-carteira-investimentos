@@ -65,4 +65,20 @@ class FixedIncomeApiIntegrationTest {
 
     assertThat(body).contains("\"index\":\"SELIC_TARGET\"").contains("\"unit\":\"% ao ano\"");
   }
+
+  @Test
+  void shouldListTheModelProductsFromConfiguration() {
+    String body =
+        RestClient.create("http://localhost:" + port)
+            .get()
+            .uri("/api/fixed-income/products")
+            .retrieve()
+            .body(String.class);
+
+    assertThat(body)
+        .contains("\"id\":\"tesouro-selic\"")
+        .contains("\"id\":\"lci-92\"")
+        .contains("\"incomeTaxExempt\":true")
+        .contains("\"gracePeriodDays\":90");
+  }
 }

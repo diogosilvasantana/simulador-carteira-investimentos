@@ -29,6 +29,46 @@ simulador:
     sync:
       # Histórico buscado na primeira carga; a sincronização roda na subida e às 8h e 20h.
       backfill-years: 3
+    # Produtos modelo pós-fixados para treinar: taxas típicas de mercado, não ofertas reais.
+    # O Tesouro Selic é aproximado por 100% do CDI, que anda colado na Selic over.
+    products:
+      - id: tesouro-selic
+        name: Tesouro Selic
+        kind: TESOURO_SELIC
+        index-percentage: 100
+        income-tax-exempt: false
+        grace-period-days: 0
+      - id: cdb-100
+        name: CDB liquidez diária 100% do CDI
+        kind: CDB
+        index-percentage: 100
+        income-tax-exempt: false
+        grace-period-days: 0
+      - id: cdb-105
+        name: CDB 105% do CDI
+        kind: CDB
+        index-percentage: 105
+        income-tax-exempt: false
+        grace-period-days: 0
+      - id: cdb-110
+        name: CDB 110% do CDI
+        kind: CDB
+        index-percentage: 110
+        income-tax-exempt: false
+        grace-period-days: 0
+      # Resolução CMN 5.119/2024: LCI e LCA têm carência mínima de 90 dias
+      - id: lci-92
+        name: LCI 92% do CDI
+        kind: LCI
+        index-percentage: 92
+        income-tax-exempt: true
+        grace-period-days: 90
+      - id: lca-90
+        name: LCA 90% do CDI
+        kind: LCA
+        index-percentage: 90
+        income-tax-exempt: true
+        grace-period-days: 90
     # Tabelas versionadas pela data de vigência (ADR-011). Mudou a lei? Acrescente uma tabela com
     # o novo valid-from em vez de editar a antiga.
     taxes:
