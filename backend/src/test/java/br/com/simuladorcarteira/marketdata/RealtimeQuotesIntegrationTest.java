@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.lang.reflect.Type;
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
@@ -22,6 +23,7 @@ import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
@@ -39,6 +41,12 @@ class RealtimeQuotesIntegrationTest {
       """
       {"type":"tick","ticker":"PETR4","last":"38.47","bid":"38.46","ask":"38.48",\
       "previous_close":"37.00","volume":1200,"occurred_at":"2026-11-24T13:15:00+00:00","source":"LIVE"}\
+      """;
+
+  private static final String ASSET =
+      """
+      {"type":"asset","ticker":"PETR4","description":"PETROBRAS   PN      N2",\
+      "path":"BOVESPA\\\\A VISTA\\\\PETR4"}\
       """;
 
   @LocalServerPort private int port;
@@ -77,6 +85,38 @@ class RealtimeQuotesIntegrationTest {
   }
 
   @Test
+  void shouldGroupQuotesByCategoryWithCatalogData() throws Exception {
+    BlockingQueue<List<Map<String, Object>>> received = new LinkedBlockingQueue<>();
+    StompSession stomp = connectStomp();
+    stomp.subscribe("/topic/quotes/category/acoes", new BatchFrameHandler(received));
+    Thread.sleep(200);
+
+    WebSocketSession ingest = connectIngest("test-token");
+    ingest.sendMessage(new TextMessage(ASSET));
+    ingest.sendMessage(new TextMessage(TICK));
+
+    List<Map<String, Object>> batch =
+        Objects.requireNonNull(received.poll(5, TimeUnit.SECONDS), "nenhum lote recebido");
+    assertThat(batch)
+        .singleElement()
+        .satisfies(
+            quote ->
+                assertThat(quote)
+                    .containsEntry("ticker", "PETR4")
+                    .containsEntry("name", "PETROBRAS")
+                    .containsEntry("type", "STOCK")
+                    .containsEntry("category", "acoes")
+                    .containsEntry("listingSegment", "LEVEL_2"));
+    String assets =
+        RestClient.create("http://localhost:" + port)
+            .get()
+            .uri("/api/assets?category=acoes")
+            .retrieve()
+            .body(String.class);
+    assertThat(assets).contains("\"ticker\":\"PETR4\"").contains("\"last\":\"38.47\"");
+  }
+
+  @Test
   void shouldRejectIngestWithWrongToken() {
     assertThatThrownBy(() -> connectIngest("wrong-token")).isInstanceOf(ExecutionException.class);
   }
@@ -104,6 +144,23 @@ class RealtimeQuotesIntegrationTest {
             .get(5, TimeUnit.SECONDS);
     stompSession = session;
     return session;
+  }
+
+  private record BatchFrameHandler(BlockingQueue<List<Map<String, Object>>> queue)
+      implements StompFrameHandler {
+
+    @Override
+    public Type getPayloadType(StompHeaders headers) {
+      return List.class;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void handleFrame(StompHeaders headers, @Nullable Object payload) {
+      if (payload instanceof List<?> list) {
+        queue.add((List<Map<String, Object>>) list);
+      }
+    }
   }
 
   private record QueueFrameHandler(BlockingQueue<Map<String, Object>> queue)

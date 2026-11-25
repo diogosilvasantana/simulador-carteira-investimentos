@@ -1,62 +1,60 @@
 import { TestBed } from '@angular/core/testing';
-import { Quote, compareDecimal } from './quote';
+import { compareDecimal } from './quote';
 import { QuoteStore } from './quote-store';
-
-function quote(ticker: string, last: string, occurredAt = '2026-11-24T13:00:00Z'): Quote {
-  return {
-    ticker,
-    last,
-    bid: null,
-    ask: null,
-    previousClose: null,
-    changePercent: null,
-    volume: 100,
-    occurredAt,
-    source: 'SYNTHETIC',
-  };
-}
+import { aQuote } from './testing';
 
 describe('QuoteStore', () => {
   let store: QuoteStore;
 
   beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [QuoteStore] });
     store = TestBed.inject(QuoteStore);
   });
 
-  it('should sort rows by ticker', () => {
-    store.load([quote('VALE3', '61.20'), quote('PETR4', '38.50')]);
-
-    expect(store.rows().map((r) => r.quote.ticker)).toEqual(['PETR4', 'VALE3']);
-  });
-
   it('should mark a higher price as up and a lower one as down', () => {
-    store.apply(quote('PETR4', '38.50', '2026-11-24T13:00:00Z'));
-    store.apply(quote('PETR4', '38.51', '2026-11-24T13:00:01Z'));
+    store.load([aQuote({ ticker: 'PETR4', last: '38.50', occurredAt: '2026-11-24T13:00:00Z' })]);
+
+    store.applyAll([
+      aQuote({ ticker: 'PETR4', last: '38.51', occurredAt: '2026-11-24T13:00:01Z' }),
+    ]);
     expect(store.rows()[0].direction).toBe('up');
 
-    store.apply(quote('PETR4', '38.49', '2026-11-24T13:00:02Z'));
+    store.applyAll([
+      aQuote({ ticker: 'PETR4', last: '38.49', occurredAt: '2026-11-24T13:00:02Z' }),
+    ]);
     expect(store.rows()[0].direction).toBe('down');
   });
 
-  it('should apply a batch keeping the newest tick of each ticker', () => {
+  it('should ignore a quote older than the current one', () => {
+    store.load([aQuote({ ticker: 'PETR4', last: '38.50', occurredAt: '2026-11-24T13:00:05Z' })]);
+
     store.applyAll([
-      quote('PETR4', '38.50', '2026-11-24T13:00:00Z'),
-      quote('VALE3', '61.20', '2026-11-24T13:00:00Z'),
-      quote('PETR4', '38.60', '2026-11-24T13:00:01Z'),
+      aQuote({ ticker: 'PETR4', last: '10.00', occurredAt: '2026-11-24T13:00:01Z' }),
     ]);
-
-    expect(store.rows().map((r) => [r.quote.ticker, r.quote.last, r.direction])).toEqual([
-      ['PETR4', '38.60', 'up'],
-      ['VALE3', '61.20', 'flat'],
-    ]);
-  });
-
-  it('should ignore a tick older than the current one', () => {
-    store.apply(quote('PETR4', '38.50', '2026-11-24T13:00:05Z'));
-
-    store.apply(quote('PETR4', '10.00', '2026-11-24T13:00:01Z'));
 
     expect(store.rows()[0].quote.last).toBe('38.50');
+  });
+
+  it('should fill in the first trade of an asset that had no quote', () => {
+    store.load([aQuote({ ticker: 'HGLG11', last: null, occurredAt: null })]);
+
+    store.applyAll([aQuote({ ticker: 'HGLG11', last: '158.30' })]);
+
+    expect(store.rows()[0].quote.last).toBe('158.30');
+    expect(store.rows()[0].direction).toBe('flat');
+  });
+
+  it('should restart the list when a new category is loaded', () => {
+    store.load([aQuote({ ticker: 'PETR4' })]);
+
+    store.load([aQuote({ ticker: 'MXRF11' }), aQuote({ ticker: 'HGLG11' })]);
+
+    expect(
+      store
+        .rows()
+        .map((row) => row.quote.ticker)
+        .sort(),
+    ).toEqual(['HGLG11', 'MXRF11']);
   });
 });
 
@@ -65,5 +63,10 @@ describe('compareDecimal', () => {
     expect(compareDecimal('0.3', '0.30')).toBe(0);
     expect(compareDecimal('100.1', '99.99')).toBe(1);
     expect(compareDecimal('9.75', '9.8')).toBe(-1);
+  });
+
+  it('should compare negative changes', () => {
+    expect(compareDecimal('-2.10', '0.50')).toBe(-1);
+    expect(compareDecimal('-0.5', '-2.1')).toBe(1);
   });
 });

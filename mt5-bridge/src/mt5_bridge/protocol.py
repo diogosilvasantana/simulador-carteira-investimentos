@@ -55,6 +55,20 @@ class Tick:
 
 
 @dataclass(frozen=True, slots=True)
+class AssetInfo:
+    """Cadastro de um ativo como o MT5 informa; o backend classifica pela descrição (ADR-010)."""
+
+    ticker: str
+    description: str
+    path: str = ""
+
+    def to_json(self) -> str:
+        payload = asdict(self)
+        payload["type"] = "asset"
+        return json.dumps(payload, separators=(",", ":"), ensure_ascii=False)
+
+
+@dataclass(frozen=True, slots=True)
 class Heartbeat:
     """Sinal de vida enviado a cada 5 s; sem ele por 15 s, o backend marca o feed como STALE."""
 

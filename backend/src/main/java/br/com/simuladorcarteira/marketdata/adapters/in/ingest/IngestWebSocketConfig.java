@@ -1,6 +1,7 @@
 package br.com.simuladorcarteira.marketdata.adapters.in.ingest;
 
 import br.com.simuladorcarteira.marketdata.application.IngestTick;
+import br.com.simuladorcarteira.marketdata.application.RegisterAsset;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
@@ -18,12 +19,17 @@ import tools.jackson.databind.ObjectMapper;
 class IngestWebSocketConfig implements WebSocketConfigurer {
 
   private final IngestTick ingestTick;
+  private final RegisterAsset registerAsset;
   private final ObjectMapper objectMapper;
   private final IngestProperties properties;
 
   IngestWebSocketConfig(
-      IngestTick ingestTick, ObjectMapper objectMapper, IngestProperties properties) {
+      IngestTick ingestTick,
+      RegisterAsset registerAsset,
+      ObjectMapper objectMapper,
+      IngestProperties properties) {
     this.ingestTick = ingestTick;
+    this.registerAsset = registerAsset;
     this.objectMapper = objectMapper;
     this.properties = properties;
   }
@@ -31,7 +37,7 @@ class IngestWebSocketConfig implements WebSocketConfigurer {
   @Override
   public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
     registry
-        .addHandler(new TickIngestHandler(ingestTick, objectMapper), "/ingest")
+        .addHandler(new TickIngestHandler(ingestTick, registerAsset, objectMapper), "/ingest")
         .addInterceptors(new IngestTokenInterceptor(properties.token()));
   }
 }

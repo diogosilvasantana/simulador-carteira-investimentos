@@ -1,9 +1,9 @@
 package br.com.simuladorcarteira.marketdata.application;
 
-import br.com.simuladorcarteira.marketdata.domain.Tick;
+import br.com.simuladorcarteira.marketdata.domain.AssetQuote;
 
 /** Porta de saída: avisa quem está assistindo que uma cotação mudou. */
 public interface QuoteBroadcaster {
 
-  void broadcast(Tick tick);
+  void broadcast(AssetQuote quote);
 }

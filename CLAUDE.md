@@ -18,6 +18,9 @@ Use sempre estes nomes no código. Se um conceito novo surgir, adicione-o aqui e
 | Termo | No código |
 | --- | --- |
 | Ativo | `Asset` |
+| Tipo de ativo (ação, unit, FII, Fiagro, ETF, BDR) | `AssetType` |
+| Categoria da vitrine | `AssetCategory` |
+| Segmento de listagem (Novo Mercado, N1, N2) | `ListingSegment` |
 | Ticker | `Ticker` |
 | Ordem | `Order` |
 | Execução | `Execution` |

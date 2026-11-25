@@ -1,68 +1,92 @@
 <section class="quotes">
   <header class="quotes__header">
     <h1>Cotações</h1>
-    <span [class]="'status status--' + stream.state()">
-      {{ stateLabel[stream.state()] }}
-    </span>
-    <span class="count">{{ visibleRows().length }} de {{ store.rows().length }} ativos</span>
-    <input
-      #search
-      class="search"
-      type="search"
-      placeholder="Buscar ativo"
-      aria-label="Buscar ativo"
-      (input)="query.set(search.value)"
-    />
+    <span [class]="'status status--' + stream.state()">{{ stateLabel[stream.state()] }}</span>
   </header>
 
-  @if (store.rows().length === 0) {
-    <p class="empty">
-      Nenhuma cotação ainda. Inicie a ponte do MT5 ou o modo sintético para ver os preços aqui.
-    </p>
-  } @else {
-    <table>
-      <thead>
-        <tr>
-          <th scope="col" [attr.aria-sort]="ariaSort('ticker')">
-            <button type="button" class="sort" (click)="sortBy('ticker')">Ativo</button>
-          </th>
-          <th scope="col" class="num">Último</th>
-          <th scope="col" class="num" [attr.aria-sort]="ariaSort('change')">
-            <button type="button" class="sort" (click)="sortBy('change')">Variação</button>
-          </th>
-          <th scope="col" class="num">Compra</th>
-          <th scope="col" class="num">Venda</th>
-          <th scope="col" class="num">Fech. anterior</th>
-          <th scope="col" class="num">Volume</th>
-          <th scope="col">Horário</th>
-          <th scope="col">Fonte</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (row of visibleRows(); track row.quote.ticker) {
-          <tr>
-            <th scope="row">{{ row.quote.ticker }}</th>
-            @for (revision of [row.revision]; track revision) {
-              <td [class]="'num last last--' + row.direction">
-                {{ formatPrice(row.quote.last) }}
-              </td>
-            }
-            <td [class]="changeClass(row.quote.changePercent)">
-              {{ formatChange(row.quote.changePercent) }}
-            </td>
-            <td class="num">{{ formatPrice(row.quote.bid) }}</td>
-            <td class="num">{{ formatPrice(row.quote.ask) }}</td>
-            <td class="num">{{ formatPrice(row.quote.previousClose) }}</td>
-            <td class="num">{{ row.quote.volume }}</td>
-            <td>{{ row.quote.occurredAt | date: 'HH:mm:ss' }}</td>
-            <td>{{ sourceLabel[row.quote.source] }}</td>
-          </tr>
-        } @empty {
-          <tr>
-            <td colspan="9" class="empty">Nenhum ativo com “{{ query() }}”.</td>
-          </tr>
+  <nav class="tabs" aria-label="Categorias">
+    @for (category of categories; track category.slug) {
+      <a
+        class="tab"
+        [routerLink]="['/cotacoes', category.slug]"
+        routerLinkActive="tab--active"
+        ariaCurrentWhenActive="page"
+      >
+        {{ category.label }}
+        @if (counts()[category.slug] !== undefined) {
+          <span class="tab__count">{{ counts()[category.slug] }}</span>
         }
-      </tbody>
-    </table>
+      </a>
+    }
+  </nav>
+
+  @if (!current()) {
+    <p class="empty">Categoria desconhecida. Escolha uma das abas acima.</p>
+  } @else {
+    <div class="toolbar">
+      <span class="count" aria-live="polite">{{ loading() ? 'Carregando…' : countLabel() }}</span>
+      <input
+        #search
+        class="search"
+        type="search"
+        placeholder="Buscar por ticker ou nome"
+        aria-label="Buscar ativo"
+        (input)="query.set(search.value)"
+      />
+    </div>
+
+    @if (failed()) {
+      <p class="empty">Não deu para carregar a lista agora. As atualizações ao vivo continuam.</p>
+    } @else if (!loading() && store.rows().length === 0) {
+      <p class="empty">
+        Nenhum ativo nesta categoria ainda. Inicie a ponte do MT5 com
+        <code>--symbols all</code> ou o modo sintético.
+      </p>
+    }
+
+    <div class="grid" role="table" [attr.aria-label]="'Cotações de ' + current()!.label">
+      <div class="row row--head" role="row">
+        <span class="cell" role="columnheader" [attr.aria-sort]="ariaSort('ticker')">
+          <button type="button" class="sort" (click)="sortBy('ticker')">Ativo</button>
+        </span>
+        <span class="cell num" role="columnheader">Último</span>
+        <span class="cell num" role="columnheader" [attr.aria-sort]="ariaSort('change')">
+          <button type="button" class="sort" (click)="sortBy('change')">Variação</button>
+        </span>
+        <span class="cell cell--detail" role="columnheader">Tipo</span>
+        <span
+          class="cell num cell--volume"
+          role="columnheader"
+          [attr.aria-sort]="ariaSort('volume')"
+        >
+          <button type="button" class="sort" (click)="sortBy('volume')">Volume</button>
+        </span>
+        <span class="cell cell--time" role="columnheader">Horário</span>
+      </div>
+
+      <cdk-virtual-scroll-viewport class="viewport" [itemSize]="rowHeight" role="rowgroup">
+        <div *cdkVirtualFor="let row of visible(); trackBy: trackByTicker" class="row" role="row">
+          <span class="cell cell--asset" role="cell">
+            <span class="ticker">{{ row.quote.ticker }}</span>
+            <span class="name">{{ row.quote.name ?? '' }}</span>
+          </span>
+          @for (revision of [row.revision]; track revision) {
+            <span [class]="'cell num last last--' + row.direction" role="cell">
+              {{ formatPrice(row.quote.last) }}
+            </span>
+          }
+          <span [class]="changeClass(row.quote.changePercent)" role="cell">
+            {{ formatChange(row.quote.changePercent) }}
+          </span>
+          <span class="cell cell--detail" role="cell">{{ detail(row.quote) }}</span>
+          <span class="cell num cell--volume" role="cell">{{
+            formatVolume(row.quote.volume)
+          }}</span>
+          <span class="cell cell--time" role="cell">
+            {{ row.quote.occurredAt ? (row.quote.occurredAt | date: 'HH:mm:ss') : '—' }}
+          </span>
+        </div>
+      </cdk-virtual-scroll-viewport>
+    </div>
   }
 </section>
