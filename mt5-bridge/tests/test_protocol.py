@@ -4,7 +4,17 @@ from decimal import Decimal
 
 import pytest
 
-from mt5_bridge.protocol import AssetInfo, Heartbeat, Source, Tick
+from mt5_bridge.protocol import (
+    MAX_CANDLES,
+    AssetInfo,
+    Candle,
+    CandleBatch,
+    Heartbeat,
+    HistoryRequest,
+    Source,
+    Tick,
+    Timeframe,
+)
 
 SAO_PAULO = timezone(timedelta(hours=-3))
 
@@ -75,3 +85,59 @@ def test_asset_message_keeps_b3_description_untouched() -> None:
         "description": "PETROBRAS   PN      N2",
         "path": "BOVESPA\\A VISTA",
     }
+
+
+def test_history_request_reads_the_backend_message() -> None:
+    request = HistoryRequest.from_json(
+        '{"type":"history","request_id":"r1","ticker":"petr4","timeframe":"D1","count":260}'
+    )
+
+    assert request == HistoryRequest("r1", "PETR4", Timeframe.D1, 260)
+
+
+def test_history_request_caps_the_number_of_candles() -> None:
+    request = HistoryRequest.from_json(
+        '{"type":"history","request_id":"r1","ticker":"PETR4","timeframe":"W1","count":99999}'
+    )
+
+    assert request is not None
+    assert request.count == MAX_CANDLES
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        '{"type":"tick"}',
+        '{"type":"history","request_id":"r1","ticker":"PETR4","timeframe":"Y1","count":5}',
+        "not json",
+        "[]",
+    ],
+)
+def test_history_request_ignores_anything_else(raw: str) -> None:
+    assert HistoryRequest.from_json(raw) is None
+
+
+def test_candle_batch_serializes_prices_as_strings() -> None:
+    candle = Candle(
+        datetime(2026, 11, 24, 13, tzinfo=UTC),
+        Decimal("38.10"),
+        Decimal("38.90"),
+        Decimal("37.95"),
+        Decimal("38.47"),
+        1_250_000,
+    )
+
+    payload = json.loads(CandleBatch("r1", "PETR4", Timeframe.D1, [candle]).to_json())
+
+    assert payload["type"] == "candles"
+    assert payload["candles"] == [
+        {
+            "opened_at": "2026-11-24T13:00:00Z",
+            "open": "38.10",
+            "high": "38.90",
+            "low": "37.95",
+            "close": "38.47",
+            "volume": 1_250_000,
+        }
+    ]
+    assert payload["error"] is None

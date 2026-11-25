@@ -86,6 +86,98 @@ class Heartbeat:
         )
 
 
+class Timeframe(StrEnum):
+    """Duração de cada candle pedido pelo backend."""
+
+    M5 = "M5"
+    M30 = "M30"
+    H1 = "H1"
+    D1 = "D1"
+    W1 = "W1"
+
+    @property
+    def is_daily(self) -> bool:
+        return self in (Timeframe.D1, Timeframe.W1)
+
+
+# Maior histórico que o backend pode pedir de uma vez (5 anos de semanas, 1 ano de dias).
+MAX_CANDLES = 1500
+
+
+@dataclass(frozen=True, slots=True)
+class Candle:
+    """Barra de preços. Em candles diários e semanais, opened_at é a abertura do pregão no dia."""
+
+    opened_at: datetime
+    open: Decimal
+    high: Decimal
+    low: Decimal
+    close: Decimal
+    volume: int
+
+    def to_payload(self) -> dict[str, object]:
+        return {
+            "opened_at": to_instant(self.opened_at),
+            "open": str(self.open),
+            "high": str(self.high),
+            "low": str(self.low),
+            "close": str(self.close),
+            "volume": self.volume,
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class HistoryRequest:
+    """Pedido de histórico que o backend manda pela mesma conexão. A ponte só lê do MT5."""
+
+    request_id: str
+    ticker: str
+    timeframe: Timeframe
+    count: int
+
+    @staticmethod
+    def from_json(raw: str | bytes) -> HistoryRequest | None:
+        """Lê o pedido; qualquer outra mensagem, ou um pedido malformado, devolve None."""
+        try:
+            data = json.loads(raw)
+            if not isinstance(data, dict) or data.get("type") != "history":
+                return None
+            count = int(data["count"])
+            request = HistoryRequest(
+                request_id=str(data["request_id"]),
+                ticker=str(data["ticker"]).upper(),
+                timeframe=Timeframe(data["timeframe"]),
+                count=min(max(count, 1), MAX_CANDLES),
+            )
+        except (ValueError, KeyError, TypeError):
+            return None
+        return request if request.ticker and request.request_id else None
+
+
+@dataclass(frozen=True, slots=True)
+class CandleBatch:
+    """Resposta a um pedido de histórico, com erro em vez de candles se o ativo não existir."""
+
+    request_id: str
+    ticker: str
+    timeframe: Timeframe
+    candles: list[Candle]
+    error: str | None = None
+
+    def to_json(self) -> str:
+        return json.dumps(
+            {
+                "type": "candles",
+                "request_id": self.request_id,
+                "ticker": self.ticker,
+                "timeframe": self.timeframe.value,
+                "candles": [c.to_payload() for c in self.candles],
+                "error": self.error,
+            },
+            separators=(",", ":"),
+        )
+
+
 def to_instant(moment: datetime) -> str:
     """ISO-8601 em UTC com sufixo Z, o formato que o Instant.parse do Java lê."""
     return moment.astimezone(UTC).isoformat().replace("+00:00", "Z")

@@ -8,11 +8,11 @@ import random
 import re
 import time
 from collections.abc import Callable, Iterable, Mapping, Sequence
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, timedelta
 from decimal import ROUND_HALF_EVEN, Decimal
 from typing import Any, Protocol
 
-from mt5_bridge.protocol import AssetInfo, Source, Tick
+from mt5_bridge.protocol import AssetInfo, Candle, Source, Tick, Timeframe
 
 log = logging.getLogger("mt5_bridge")
 
@@ -48,6 +48,18 @@ SYNTHETIC_DESCRIPTIONS: Mapping[str, str] = {
     "IVVB11": "ISHARE SP500CI",
 }
 
+# Pregão regular da B3 em UTC: 10h às 17h de Brasília, que não tem horário de verão desde 2019.
+SESSION_OPEN_UTC_H = 13
+SESSION_CLOSE_UTC_H = 20
+
+STEPS: Mapping[Timeframe, timedelta] = {
+    Timeframe.M5: timedelta(minutes=5),
+    Timeframe.M30: timedelta(minutes=30),
+    Timeframe.H1: timedelta(hours=1),
+    Timeframe.D1: timedelta(days=1),
+    Timeframe.W1: timedelta(weeks=1),
+}
+
 # Preços iniciais do modo sintético, só para os valores parecerem plausíveis.
 DEFAULT_PRICES: Mapping[str, Decimal] = {
     "PETR4": Decimal("38.50"),
@@ -79,6 +91,10 @@ class TickSource(Protocol):
         ...
 
     def poll(self) -> list[Tick]: ...
+
+    def history(self, ticker: str, timeframe: Timeframe, count: int) -> list[Candle]:
+        """Últimos candles do ativo, do mais antigo ao mais recente. LookupError se não existir."""
+        ...
 
     def reset(self) -> None:
         """Esquece o que já foi enviado, para a próxima leitura mandar tudo de novo."""
@@ -125,6 +141,8 @@ class SyntheticSource:
         if chosen == [ALL]:
             chosen = list(DEFAULT_PRICES)
         self._random = random.Random(seed)
+        self._seed = seed
+        self._annual_volatility = annual_volatility
         self._previous_close = {s: DEFAULT_PRICES.get(s, Decimal("50.00")) for s in chosen}
         self._prices = dict(self._previous_close)
         # Pregão de ~7 h em 252 dias por ano.
@@ -166,6 +184,41 @@ class SyntheticSource:
                 )
             )
         return ticks
+
+    def history(self, ticker: str, timeframe: Timeframe, count: int) -> list[Candle]:
+        """Histórico inventado mas reprodutível: a mesma semente dá sempre os mesmos candles, e o
+        último fecha no preço atual do ativo, para o gráfico emendar com os ticks."""
+        if ticker not in self._prices:
+            raise LookupError(ticker)
+        times = session_times(timeframe, count, self._clock())
+        # Semente por ativo e período: pedir PETR4 não muda o histórico de VALE3.
+        rng = random.Random(f"{self._seed}:{ticker}:{timeframe.value}")
+        years = STEPS[timeframe].total_seconds() / (252 * 7 * 3600)
+        if timeframe.is_daily:
+            years = STEPS[timeframe].days / 365
+        sigma = self._annual_volatility * math.sqrt(years)
+        closes = [float(self._prices[ticker])]
+        for _ in range(len(times) - 1):
+            closes.append(closes[-1] / math.exp(sigma * rng.gauss(0.0, 1.0)))
+        closes.reverse()
+        candles: list[Candle] = []
+        previous = closes[0]
+        for opened_at, close in zip(times, closes, strict=True):
+            wick = abs(rng.gauss(0.0, 0.5)) * sigma
+            high = max(previous, close) * (1 + wick)
+            low = min(previous, close) * (1 - wick)
+            candles.append(
+                Candle(
+                    opened_at=opened_at,
+                    open=max(CENT, to_price(previous)),
+                    high=max(CENT, to_price(high)),
+                    low=max(CENT, to_price(low)),
+                    close=max(CENT, to_price(close)),
+                    volume=rng.randint(100, 5000) * 100,
+                )
+            )
+            previous = close
+        return candles
 
     def close(self) -> None:
         pass
@@ -277,6 +330,13 @@ class Mt5Source:
         self._previous_close[symbol] = (day, value)
         return value, 1
 
+    def history(self, ticker: str, timeframe: Timeframe, count: int) -> list[Candle]:
+        if self._mt5.symbol_info(ticker) is None or not self._mt5.symbol_select(ticker, True):
+            raise LookupError(ticker)
+        frame = getattr(self._mt5, f"TIMEFRAME_{timeframe.value}")
+        rates = self._mt5.copy_rates_from_pos(ticker, frame, 0, count)
+        return to_candles(rates, timeframe, offset_s=self._offset_s)
+
     def close(self) -> None:
         self._mt5.shutdown()
 
@@ -314,3 +374,63 @@ def to_tick(
         source=Source.LIVE,
         previous_close=previous_close,
     )
+
+
+def session_times(timeframe: Timeframe, count: int, now: datetime) -> list[datetime]:
+    """Aberturas dos últimos candles até agora, só em dias úteis e dentro do pregão."""
+    step = STEPS[timeframe]
+    times: list[datetime] = []
+    if timeframe.is_daily:
+        day = now.date()
+        if timeframe is Timeframe.W1:
+            day -= timedelta(days=day.weekday())
+        while len(times) < count:
+            if day.weekday() < 5:
+                times.append(session_open(day))
+            day -= step
+    else:
+        minutes = int(step.total_seconds() // 60)
+        cursor = now.replace(second=0, microsecond=0)
+        cursor -= timedelta(minutes=cursor.minute % minutes)
+        while len(times) < count:
+            in_session = SESSION_OPEN_UTC_H <= cursor.hour < SESSION_CLOSE_UTC_H
+            if cursor.weekday() < 5 and in_session:
+                times.append(cursor)
+            cursor -= step
+    times.reverse()
+    return times
+
+
+def session_open(day: date) -> datetime:
+    """Candles diários marcam a abertura do pregão: assim a data é a mesma em UTC e em Brasília."""
+    return datetime(day.year, day.month, day.day, SESSION_OPEN_UTC_H, tzinfo=UTC)
+
+
+def to_candles(
+    rates: Sequence[Any] | None, timeframe: Timeframe, *, offset_s: int = 0
+) -> list[Candle]:
+    """Converte as barras do MT5 (horários no relógio do servidor da corretora)."""
+    candles: list[Candle] = []
+    for bar in rates if rates is not None else ():
+        server_time = int(bar["time"])
+        if timeframe.is_daily:
+            opened_at = session_open(
+                date.fromordinal(date(1970, 1, 1).toordinal() + server_time // SECONDS_PER_DAY)
+            )
+        else:
+            opened_at = datetime.fromtimestamp(server_time - offset_s, tz=UTC)
+        prices = [to_price(float(bar[k])) for k in ("open", "high", "low", "close")]
+        if min(prices) <= 0:
+            continue
+        real = int(bar["real_volume"])
+        candles.append(
+            Candle(
+                opened_at=opened_at,
+                open=prices[0],
+                high=prices[1],
+                low=prices[2],
+                close=prices[3],
+                volume=real if real > 0 else int(bar["tick_volume"]),
+            )
+        )
+    return candles

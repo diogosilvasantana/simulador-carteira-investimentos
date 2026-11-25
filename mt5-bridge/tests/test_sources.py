@@ -2,13 +2,17 @@ from datetime import UTC, datetime
 from decimal import Decimal
 from types import SimpleNamespace
 
-from mt5_bridge.protocol import Source
+import pytest
+
+from mt5_bridge.protocol import Source, Timeframe
 from mt5_bridge.sender import next_backoff
 from mt5_bridge.sources import (
     SyntheticSource,
     is_storefront_symbol,
     previous_close,
+    session_times,
     synthetic_description,
+    to_candles,
     to_tick,
 )
 
@@ -133,3 +137,59 @@ def test_synthetic_all_uses_built_in_symbols_with_previous_close() -> None:
     assert len(ticks) == len(source.symbols) > 10
     assert all(t.previous_close is not None for t in ticks)
     assert {a.ticker for a in source.assets()} == set(source.symbols)
+
+
+def test_synthetic_history_is_reproducible_and_ends_at_the_current_price() -> None:
+    first = make_source(7).history("PETR4", Timeframe.D1, 30)
+    second = make_source(7).history("PETR4", Timeframe.D1, 30)
+
+    assert first == second
+    assert len(first) == 30
+    assert first[-1].close == Decimal("38.50")
+
+
+def test_synthetic_history_has_consistent_bars() -> None:
+    for candle in make_source(3).history("VALE3", Timeframe.M5, 200):
+        assert candle.low <= min(candle.open, candle.close)
+        assert candle.high >= max(candle.open, candle.close)
+        assert candle.low > 0
+
+
+def test_synthetic_history_rejects_unknown_ticker() -> None:
+    with pytest.raises(LookupError):
+        make_source(1).history("NOPE3", Timeframe.D1, 10)
+
+
+def test_session_times_skip_weekends_and_stay_inside_the_session() -> None:
+    # 24/11/2026 é uma terça; cinco dias úteis para trás passam pelo fim de semana.
+    days = session_times(Timeframe.D1, 5, FIXED_NOW)
+
+    assert [d.date().isoformat() for d in days] == [
+        "2026-11-18",
+        "2026-11-19",
+        "2026-11-20",
+        "2026-11-23",
+        "2026-11-24",
+    ]
+    for moment in session_times(Timeframe.M30, 40, FIXED_NOW):
+        assert moment.weekday() < 5
+        assert 13 <= moment.hour < 20
+
+
+def test_mt5_daily_bars_keep_the_server_date() -> None:
+    # Barra diária do dia 24 no relógio do servidor (meia-noite), com volume real.
+    bar = {
+        "time": 1_795_478_400,
+        "open": 38.1,
+        "high": 38.9,
+        "low": 37.95,
+        "close": 38.47,
+        "tick_volume": 10,
+        "real_volume": 1_250_000,
+    }
+
+    (candle,) = to_candles([bar], Timeframe.D1, offset_s=3 * 3600)
+
+    assert candle.opened_at == datetime(2026, 11, 24, 13, tzinfo=UTC)
+    assert candle.close == Decimal("38.47")
+    assert candle.volume == 1_250_000
