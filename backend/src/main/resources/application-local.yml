@@ -12,7 +12,9 @@ spring:
       - org.springframework.modulith.events.jdbc.JdbcEventPublicationAutoConfiguration
       - org.springframework.modulith.events.config.EventPublicationAutoConfiguration
   datasource:
-    url: jdbc:h2:file:${simulador.local.data-dir}/simulador
+    # WRITE_DELAY=0: grava antes de responder; o padrão do H2 espera 500 ms e perderia dados quando o
+    # dev.cmd -Stop encerra o processo à força.
+    url: jdbc:h2:file:${simulador.local.data-dir}/simulador;WRITE_DELAY=0
     username: sa
     password: ""
   flyway:
