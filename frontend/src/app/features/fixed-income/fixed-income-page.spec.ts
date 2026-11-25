@@ -59,17 +59,15 @@ describe('FixedIncomePage', () => {
   it('should show the annual CDI and compare every product by net amount', async () => {
     const { page, http } = await open();
 
-    http
-      .expectOne('/api/fixed-income/indexes')
-      .flush([
-        {
-          index: 'CDI',
-          date: '2026-11-23',
-          percent: '0.055131',
-          unit: '% ao dia',
-          annualPercent: '14.90',
-        },
-      ]);
+    http.expectOne('/api/fixed-income/indexes').flush([
+      {
+        index: 'CDI',
+        date: '2026-11-23',
+        percent: '0.055131',
+        unit: '% ao dia',
+        annualPercent: '14.90',
+      },
+    ]);
     http.expectOne('/api/fixed-income/products').flush([LCI, CDB]);
     const simulations = http.match('/api/fixed-income/simulations');
     expect(simulations.map((r) => r.request.body.indexPercentage)).toEqual(['92', '110']);
