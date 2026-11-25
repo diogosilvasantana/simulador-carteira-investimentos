@@ -19,7 +19,7 @@ final class Messages {
     return value.amount().toPlainString();
   }
 
-  static @Nullable String money(@Nullable Money value) {
+  static @Nullable String optionalMoney(@Nullable Money value) {
     return value == null ? null : value.amount().toPlainString();
   }
 
@@ -83,7 +83,7 @@ final class Messages {
           p.assetClass().slug(),
           p.quantity(),
           money(p.averagePrice()),
-          money(p.lastPrice()),
+          optionalMoney(p.lastPrice()),
           decimal(p.changePercent()),
           money(p.marketValue()),
           money(p.unrealizedPnl()),
