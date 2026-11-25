@@ -1,5 +1,6 @@
 package br.com.simuladorcarteira.fixedincome.adapters.in.web;
 
+import br.com.simuladorcarteira.fixedincome.application.FixedIncomeProducts;
 import br.com.simuladorcarteira.fixedincome.application.ListIndexes;
 import br.com.simuladorcarteira.fixedincome.application.SimulateRedemption;
 import br.com.simuladorcarteira.shared.Money;
@@ -18,10 +19,20 @@ class FixedIncomeController {
 
   private final ListIndexes listIndexes;
   private final SimulateRedemption simulateRedemption;
+  private final FixedIncomeProducts products;
 
-  FixedIncomeController(ListIndexes listIndexes, SimulateRedemption simulateRedemption) {
+  FixedIncomeController(
+      ListIndexes listIndexes,
+      SimulateRedemption simulateRedemption,
+      FixedIncomeProducts products) {
     this.listIndexes = listIndexes;
     this.simulateRedemption = simulateRedemption;
+    this.products = products;
+  }
+
+  @GetMapping("/products")
+  List<ProductMessage> products() {
+    return products.all().stream().map(ProductMessage::from).toList();
   }
 
   @GetMapping("/indexes")
