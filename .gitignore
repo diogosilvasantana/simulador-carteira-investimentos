@@ -31,3 +31,6 @@ mt5-bridge/*.csv
 .env.*
 !.env.example
 *.egg-info/
+
+# Estado do dev.cmd (processos abertos)
+.dev/

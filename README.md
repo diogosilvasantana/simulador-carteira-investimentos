@@ -55,6 +55,17 @@ Documentação completa em [`docs/architecture`](docs/architecture/README.md) e 
 
 Pré-requisitos: JDK 25, Node 22+, Docker. O Maven vem pelo wrapper (`./mvnw`).
 
+No Windows, com o MetaTrader 5 aberto, um comando sobe backend, frontend e ponte, cada um na sua
+janela, e abre o navegador ([guia completo](docs/guias/rodar-local-windows.md)):
+
+```powershell
+.\dev.cmd                     # cotações reais do MT5
+.\dev.cmd -Source synthetic   # mercado fechado
+.\dev.cmd -Stop               # encerra tudo
+```
+
+Cada parte separada:
+
 ```bash
 # backend
 cd backend && ./mvnw spring-boot:run
