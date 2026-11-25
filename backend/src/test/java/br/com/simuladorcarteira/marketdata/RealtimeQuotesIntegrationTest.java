@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import br.com.simuladorcarteira.PostgresTestConfiguration;
+import br.com.simuladorcarteira.TestLogin;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.List;
@@ -25,7 +26,6 @@ import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
@@ -111,7 +111,7 @@ class RealtimeQuotesIntegrationTest {
                     .containsEntry("category", "acoes")
                     .containsEntry("listingSegment", "LEVEL_2"));
     String assets =
-        RestClient.create("http://localhost:" + port)
+        TestLogin.client(port)
             .get()
             .uri("/api/assets?category=acoes")
             .retrieve()
@@ -143,7 +143,10 @@ class RealtimeQuotesIntegrationTest {
     client.setMessageConverter(new JacksonJsonMessageConverter());
     StompSession session =
         client
-            .connectAsync("ws://localhost:" + port + "/ws", new StompSessionHandlerAdapter() {})
+            .connectAsync(
+                "ws://localhost:" + port + "/ws",
+                new WebSocketHttpHeaders(TestLogin.headers(port)),
+                new StompSessionHandlerAdapter() {})
             .get(5, TimeUnit.SECONDS);
     stompSession = session;
     return session;

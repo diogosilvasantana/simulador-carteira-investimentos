@@ -9,6 +9,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
+import { AuthService } from './core/auth';
 import { QuoteStream } from './features/quotes/quote-stream';
 import { TradeDrawer } from './shared/trade-drawer';
 import { BrandMark } from './shared/brand-mark';
@@ -53,6 +54,9 @@ export class App {
   );
 
   protected readonly stream = inject(QuoteStream);
+  protected readonly auth = inject(AuthService);
+  // A tela de login ocupa a página inteira, sem menu.
+  protected readonly onLogin = computed(() => this.url().startsWith('/login'));
   protected readonly stateLabel = {
     connected: 'Cotações ao vivo',
     connecting: 'Conectando às cotações…',

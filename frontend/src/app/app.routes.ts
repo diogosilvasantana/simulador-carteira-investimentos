@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/auth';
 
-export const routes: Routes = [
+const privateRoutes: Routes = [
   { path: '', loadComponent: () => import('./features/home/home').then((m) => m.Home) },
   { path: 'cotacoes', pathMatch: 'full', redirectTo: 'cotacoes/acoes' },
   {
@@ -35,4 +36,15 @@ export const routes: Routes = [
       import('./features/fixed-income/fixed-income-page').then((m) => m.FixedIncomePage),
   },
   { path: '**', redirectTo: '' },
+];
+
+export const routes: Routes = [
+  {
+    path: 'login',
+    title: 'Entrar',
+    loadComponent: () => import('./features/login/login-page').then((m) => m.LoginPage),
+  },
+  // Tudo além do login exige sessão; a segurança de verdade está no backend, isto só evita
+  // mostrar uma tela vazia antes do 401.
+  ...privateRoutes.map((route) => ({ ...route, canActivate: [authGuard] })),
 ];

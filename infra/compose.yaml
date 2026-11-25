@@ -18,6 +18,9 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       # Domínio público do frontend; sem ele o navegador não abre o WebSocket de cotações
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8081}
+      # Login do único usuário (ADR-014). O hash sai de scripts/gerar-hash-senha.py
+      APP_USERNAME: ${APP_USERNAME:?defina APP_USERNAME}
+      APP_PASSWORD_HASH: ${APP_PASSWORD_HASH:?defina APP_PASSWORD_HASH}
       # Segredo que a ponte MT5 envia junto das cotações; vazio desliga a ingestão
       INGEST_TOKEN: ${INGEST_TOKEN:-}
     depends_on:

@@ -3,6 +3,7 @@ package br.com.simuladorcarteira.portfolio;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import br.com.simuladorcarteira.PostgresTestConfiguration;
+import br.com.simuladorcarteira.TestLogin;
 import br.com.simuladorcarteira.marketdata.application.LatestQuoteRepository;
 import br.com.simuladorcarteira.marketdata.domain.Tick;
 import br.com.simuladorcarteira.marketdata.domain.TickSource;
@@ -34,7 +35,7 @@ class PortfolioApiIntegrationTest {
 
   @BeforeEach
   void setUp() {
-    client = RestClient.create("http://localhost:" + port);
+    client = TestLogin.client(port);
     client.delete().uri("/api/portfolio").retrieve().toBodilessEntity();
     quotes.save(
         new Tick(

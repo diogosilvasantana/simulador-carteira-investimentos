@@ -1,0 +1,48 @@
+<main class="login">
+  <form class="card" (submit)="submit($event)" novalidate>
+    <div class="brand">
+      <app-brand-mark />
+      <span>Simulador de Carteira</span>
+    </div>
+    <h1>Entrar</h1>
+    <p class="lead">Área restrita. Só o dono da carteira tem acesso.</p>
+
+    <div class="field">
+      <label for="login-user">Usuário</label>
+      <input
+        id="login-user"
+        name="username"
+        autocomplete="username"
+        autocapitalize="none"
+        spellcheck="false"
+        required
+        [value]="username()"
+        (input)="username.set($any($event.target).value)"
+      />
+    </div>
+    <div class="field">
+      <label for="login-password">Senha</label>
+      <input
+        id="login-password"
+        name="password"
+        type="password"
+        autocomplete="current-password"
+        required
+        [value]="password()"
+        (input)="password.set($any($event.target).value)"
+      />
+    </div>
+
+    @if (error(); as e) {
+      <p class="notice notice--error" role="alert">{{ e }}</p>
+    }
+
+    <button
+      type="submit"
+      class="btn btn--primary btn--block"
+      [disabled]="pending() || !username() || !password()"
+    >
+      {{ pending() ? 'Entrando…' : 'Entrar' }}
+    </button>
+  </form>
+</main>

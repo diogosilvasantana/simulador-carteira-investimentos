@@ -6,7 +6,17 @@ spring:
     url: ${SPRING_DATASOURCE_URL:jdbc:h2:file:./data/simulador;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH}
     username: ${SPRING_DATASOURCE_USERNAME:sa}
     password: ${SPRING_DATASOURCE_PASSWORD:}
+server:
+  servlet:
+    session:
+      cookie:
+        # http://localhost não tem TLS; o cookie Secure não seria enviado.
+        secure: false
 simulador:
+  security:
+    # Só para o PC: usuário admin, senha "simulador". Em produção, APP_USERNAME e APP_PASSWORD_HASH.
+    username: ${APP_USERNAME:admin}
+    password-hash: ${APP_PASSWORD_HASH:$2b$12$0/MGT3k/tj1FKmiN86tdo.VatJCzRCYe7iGMd0Nv/K6I1ImEJj5Um}
   ingest:
     token: ${INGEST_TOKEN:local-dev-token}
 
