@@ -1,6 +1,7 @@
 package br.com.simuladorcarteira.fixedincome.adapters.in.web;
 
 import br.com.simuladorcarteira.fixedincome.domain.IndexRate;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import org.jspecify.annotations.Nullable;
 
