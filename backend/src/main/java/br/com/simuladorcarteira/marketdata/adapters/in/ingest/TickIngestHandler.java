@@ -1,6 +1,7 @@
 package br.com.simuladorcarteira.marketdata.adapters.in.ingest;
 
 import br.com.simuladorcarteira.marketdata.application.IngestTick;
+import br.com.simuladorcarteira.marketdata.application.RegisterAsset;
 import br.com.simuladorcarteira.marketdata.domain.InvalidTickException;
 import br.com.simuladorcarteira.marketdata.domain.Tick;
 import br.com.simuladorcarteira.marketdata.domain.TickSource;
@@ -21,7 +22,7 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
 /**
- * Recebe as mensagens da ponte (ticks e heartbeats). Uma mensagem inválida é registrada e
+ * Recebe as mensagens da ponte (cadastro de ativos, ticks e heartbeats). Uma mensagem inválida é registrada e
  * descartada sem derrubar a conexão, para um tick ruim não interromper o feed.
  */
 class TickIngestHandler extends TextWebSocketHandler {
@@ -29,10 +30,12 @@ class TickIngestHandler extends TextWebSocketHandler {
   private static final Logger log = LoggerFactory.getLogger(TickIngestHandler.class);
 
   private final IngestTick ingestTick;
+  private final RegisterAsset registerAsset;
   private final ObjectMapper objectMapper;
 
-  TickIngestHandler(IngestTick ingestTick, ObjectMapper objectMapper) {
+  TickIngestHandler(IngestTick ingestTick, RegisterAsset registerAsset, ObjectMapper objectMapper) {
     this.ingestTick = ingestTick;
+    this.registerAsset = registerAsset;
     this.objectMapper = objectMapper;
   }
 
@@ -48,6 +51,10 @@ class TickIngestHandler extends TextWebSocketHandler {
       String type = Objects.requireNonNullElse(incoming.type(), "");
       switch (type) {
         case "tick" -> ingestTick.ingest(toTick(incoming));
+        case "asset" ->
+            registerAsset.register(
+                Ticker.of(required(incoming.ticker(), "ticker")),
+                required(incoming.description(), "description"));
         case "heartbeat" -> log.debug("Heartbeat do feed {}", incoming.source());
         default -> log.warn("Tipo de mensagem desconhecido: '{}'", type);
       }
@@ -70,7 +77,8 @@ class TickIngestHandler extends TextWebSocketHandler {
         Money.brl(required(message.last(), "last")),
         moneyOrNull(message.bid()),
         moneyOrNull(message.ask()),
-        message.volume(),
+        moneyOrNull(message.previousClose()),
+        Objects.requireNonNullElse(message.volume(), 0L),
         Instant.parse(required(message.occurredAt(), "occurred_at")),
         TickSource.valueOf(Objects.requireNonNullElse(message.source(), "LIVE")));
   }

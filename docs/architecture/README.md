@@ -136,8 +136,8 @@ Ciclo da ordem: `NEW → ACCEPTED → FILLED`, com saídas `REJECTED`, `CANCELED
 2. Conexão de saída WSS até `/ingest` (Tailscale + token), heartbeat a cada 5 s
 3. `marketdata` valida, grava a última cotação no Redis, publica `QuoteUpdated`
 4. Candles de 1 minuto no Postgres
-5. Fan-out STOMP em `/topic/quotes/{ticker}` e `/topic/portfolios/{id}`, até 4 atualizações/s
-   por ativo
+5. Fan-out STOMP em lotes de 500 ms: `/topic/quotes/category/{categoria}` para listas,
+   `/topic/quotes/{ticker}` para um ativo e `/topic/portfolios/{id}`
 6. Sem heartbeat por 15 s: `FeedStatusChanged(STALE)`, ordens a mercado recusadas
 
 ### Simulador de pregão
@@ -156,11 +156,17 @@ guarda a fonte de dados (`LIVE`, `REPLAY`, `SYNTHETIC`) com selo SIMULADO na tel
 
 ### Universo de ativos
 
-Catálogo e histórico diário vêm da
-[série histórica oficial da B3 (COTAHIST)](https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/market-data/historico/mercado-a-vista/cotacoes-historicas/):
-ações, units, ETFs, BDRs, FIIs e Fiagros. O arquivo vem sem ajuste por proventos, então
-`corporateactions` ajusta desdobramentos antes de calcular volatilidade. Uso informativo,
-sem redistribuição.
+O catálogo nasce do MT5 ([ADR-010](../adr/0010-catalogo-de-ativos-pela-especificacao-b3.md)): a
+ponte envia ticker e descrição, e o domínio lê a especificação B3 da descrição para definir o
+tipo de ativo (`AssetType`), a categoria da vitrine (`AssetCategory`: ações, FIIs, Fiagros, ETFs e
+BDRs) e o segmento de listagem (`ListingSegment`: Novo Mercado, N1, N2, Bovespa Mais). Setor e
+segmento de FII virão do Cadastro de Instrumentos e da Classificação Setorial da B3 e do Informe
+Mensal de FII da CVM.
+
+Histórico diário para replay e volatilidade vem da
+[série histórica oficial da B3 (COTAHIST)](https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/market-data/historico/mercado-a-vista/cotacoes-historicas/),
+sem ajuste por proventos: `corporateactions` ajusta desdobramentos antes de calcular
+volatilidade. Uso informativo, sem redistribuição.
 
 ## 8. Frontend
 

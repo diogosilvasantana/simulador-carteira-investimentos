@@ -30,6 +30,7 @@ class Tick:
     volume: int
     occurred_at: datetime
     source: Source = Source.LIVE
+    previous_close: Decimal | None = None
 
     def __post_init__(self) -> None:
         if not self.ticker:
@@ -45,9 +46,26 @@ class Tick:
         payload["last"] = str(self.last)
         payload["bid"] = None if self.bid is None else str(self.bid)
         payload["ask"] = None if self.ask is None else str(self.ask)
+        payload["previous_close"] = (
+            None if self.previous_close is None else str(self.previous_close)
+        )
         payload["occurred_at"] = to_instant(self.occurred_at)
         payload["source"] = self.source.value
         return json.dumps(payload, separators=(",", ":"))
+
+
+@dataclass(frozen=True, slots=True)
+class AssetInfo:
+    """Cadastro de um ativo como o MT5 informa; o backend classifica pela descrição (ADR-010)."""
+
+    ticker: str
+    description: str
+    path: str = ""
+
+    def to_json(self) -> str:
+        payload = asdict(self)
+        payload["type"] = "asset"
+        return json.dumps(payload, separators=(",", ":"), ensure_ascii=False)
 
 
 @dataclass(frozen=True, slots=True)

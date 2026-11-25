@@ -1,56 +1,60 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { QuoteStream } from './quote-stream';
 import { QuotesPage } from './quotes-page';
+import { aQuote } from './testing';
 
 describe('QuotesPage', () => {
-  const connect = vi.fn();
+  const follow = vi.fn();
 
   beforeEach(() => {
-    connect.mockReset();
+    follow.mockReset();
     TestBed.configureTestingModule({
       providers: [
+        provideRouter([]),
         provideHttpClient(),
         provideHttpClientTesting(),
-        { provide: QuoteStream, useValue: { connect, state: () => 'connected' } },
+        { provide: QuoteStream, useValue: { follow, stop: vi.fn(), state: () => 'connected' } },
       ],
     });
   });
 
-  it('should render the initial snapshot with Brazilian number format', async () => {
+  async function open(category: string): Promise<HTMLElement> {
     const fixture = TestBed.createComponent(QuotesPage);
+    fixture.componentRef.setInput('categoria', category);
     fixture.detectChanges();
-
-    TestBed.inject(HttpTestingController)
-      .expectOne('/api/quotes')
-      .flush([
-        {
-          ticker: 'BOVA11',
-          last: '1128.4',
-          bid: null,
-          ask: '1128.41',
-          volume: 300,
-          occurredAt: '2026-11-24T13:00:00Z',
-          source: 'LIVE',
-        },
-      ]);
     await fixture.whenStable();
+    return fixture.nativeElement as HTMLElement;
+  }
 
-    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
-    expect(text).toContain('BOVA11');
-    expect(text).toContain('1.128,40');
-    expect(text).toContain('Ao vivo');
-    expect(connect).toHaveBeenCalledOnce();
+  it('should load only the open category and follow its topic after the snapshot', async () => {
+    const page = await open('fiis');
+    const http = TestBed.inject(HttpTestingController);
+
+    http.expectOne('/api/categories').flush([
+      { slug: 'acoes', count: 450 },
+      { slug: 'fiis', count: 2 },
+    ]);
+    expect(follow).not.toHaveBeenCalled();
+    http
+      .expectOne((req) => req.url === '/api/assets' && req.params.get('category') === 'fiis')
+      .flush([
+        aQuote({ ticker: 'MXRF11', type: 'REAL_ESTATE_FUND' }),
+        aQuote({ ticker: 'HGLG11' }),
+      ]);
+    TestBed.tick();
+
+    expect(follow).toHaveBeenCalledWith('/topic/quotes/category/fiis', expect.any(Function));
+    expect(page.textContent).toContain('2 ativos');
+    expect(page.textContent).toContain('450');
   });
 
-  it('should show a hint while there are no quotes', async () => {
-    const fixture = TestBed.createComponent(QuotesPage);
-    fixture.detectChanges();
+  it('should tell the user when the category is unknown', async () => {
+    const page = await open('cripto');
+    TestBed.inject(HttpTestingController).expectOne('/api/categories').flush([]);
 
-    TestBed.inject(HttpTestingController).expectOne('/api/quotes').flush([]);
-    await fixture.whenStable();
-
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Nenhuma cotação ainda');
+    expect(page.textContent).toContain('Categoria desconhecida');
   });
 });

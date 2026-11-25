@@ -2,8 +2,9 @@ import { Routes } from '@angular/router';
 
 export const routes: Routes = [
   { path: '', loadComponent: () => import('./features/home/home').then((m) => m.Home) },
+  { path: 'cotacoes', pathMatch: 'full', redirectTo: 'cotacoes/acoes' },
   {
-    path: 'cotacoes',
+    path: 'cotacoes/:categoria',
     title: 'Cotações',
     loadComponent: () => import('./features/quotes/quotes-page').then((m) => m.QuotesPage),
   },

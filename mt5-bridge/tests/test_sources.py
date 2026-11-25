@@ -4,7 +4,13 @@ from types import SimpleNamespace
 
 from mt5_bridge.protocol import Source
 from mt5_bridge.sender import next_backoff
-from mt5_bridge.sources import SyntheticSource, to_tick
+from mt5_bridge.sources import (
+    SyntheticSource,
+    is_storefront_symbol,
+    previous_close,
+    synthetic_description,
+    to_tick,
+)
 
 FIXED_NOW = datetime(2026, 11, 24, 13, 15, tzinfo=UTC)
 
@@ -61,3 +67,69 @@ def test_backoff_doubles_up_to_thirty_seconds() -> None:
     assert next_backoff(1.0) == 2.0
     assert next_backoff(16.0) == 30.0
     assert next_backoff(30.0) == 30.0
+
+
+DAY = 86_400
+TODAY_10H = 20_000 * DAY + 10 * 3600
+
+
+def test_previous_close_skips_todays_candle() -> None:
+    rates = [
+        {"time": 19_998 * DAY, "close": 37.10},
+        {"time": 19_999 * DAY, "close": 37.00},
+        {"time": 20_000 * DAY, "close": 38.47},
+    ]
+
+    assert previous_close(rates, TODAY_10H) == Decimal("37.00")
+
+
+def test_previous_close_uses_last_candle_before_first_trade_of_the_day() -> None:
+    rates = [{"time": 19_998 * DAY, "close": 37.10}, {"time": 19_999 * DAY, "close": 37.00}]
+
+    assert previous_close(rates, TODAY_10H) == Decimal("37.00")
+
+
+def test_previous_close_is_unknown_without_history() -> None:
+    assert previous_close(None, TODAY_10H) is None
+    assert previous_close([{"time": 20_000 * DAY, "close": 38.0}], TODAY_10H) is None
+
+
+def test_storefront_filter_keeps_cash_market_stocks_funds_etfs_and_bdrs() -> None:
+    cash = "BOVESPA\\A VISTA\\"
+    kept = ["PETR4", "VALE3", "SANB11", "MXRF11", "BOVA11", "BRKM5", "AAPL34", "A1AP34", "BACW39"]
+    dropped = ["PETR4F", "PETRL380", "ITSA1", "MXRF12", "BDOM"]
+
+    assert all(is_storefront_symbol(s, cash + s) for s in kept)
+    assert not any(is_storefront_symbol(s, cash + s) for s in dropped)
+
+
+def test_storefront_filter_drops_symbols_outside_cash_market() -> None:
+    assert not is_storefront_symbol("DI1F31", "BMF\\DI1F31")
+    assert not is_storefront_symbol("IBOV", "BOVESPA\\INDICES\\IBOV")
+
+
+def test_synthetic_descriptions_follow_b3_fixed_width() -> None:
+    assert synthetic_description("PETR4") == "PETROBRAS   PN      N2"
+    assert synthetic_description("XPTO11") == "XPTO11      CI"
+    assert synthetic_description("XPTO3") == "XPTO3       ON"
+
+
+def test_mt5_tick_converts_server_time_to_utc() -> None:
+    # Servidor em UTC-3: 10:00 no relógio do servidor são 13:00 UTC.
+    raw = SimpleNamespace(bid=38.46, ask=38.48, last=38.47, volume=100, time_msc=TODAY_10H * 1000)
+
+    tick = to_tick("PETR4", raw, previous_close=Decimal("37.00"), offset_s=-3 * 3600)
+
+    assert tick is not None
+    assert tick.occurred_at.hour == 13
+    assert tick.previous_close == Decimal("37.00")
+
+
+def test_synthetic_all_uses_built_in_symbols_with_previous_close() -> None:
+    source = SyntheticSource(["ALL"], seed=1, trade_probability=1.0, clock=lambda: FIXED_NOW)
+
+    ticks = source.poll()
+
+    assert len(ticks) == len(source.symbols) > 10
+    assert all(t.previous_close is not None for t in ticks)
+    assert {a.ticker for a in source.assets()} == set(source.symbols)

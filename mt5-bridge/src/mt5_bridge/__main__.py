@@ -17,14 +17,30 @@ import sys
 from mt5_bridge.config import BridgeConfig
 from mt5_bridge.protocol import Source
 from mt5_bridge.sender import run
-from mt5_bridge.sources import Mt5Source, SyntheticSource, TickSource
+from mt5_bridge.sources import ALL, Mt5Source, SyntheticSource, TickSource
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(prog="mt5-bridge", description="Ponte MT5 → simulador")
     parser.add_argument("--source", choices=["mt5", "synthetic"], default="mt5")
-    parser.add_argument("--symbols", help="Lista separada por vírgula (sobrepõe BRIDGE_SYMBOLS)")
+    parser.add_argument(
+        "--symbols",
+        help="Lista separada por vírgula, ou 'all' para todas as ações, FIIs, ETFs e units "
+        "(sobrepõe BRIDGE_SYMBOLS)",
+    )
+    parser.add_argument(
+        "--server-utc-offset",
+        type=int,
+        help="Fuso do servidor MT5 em horas (ex.: -3). Sem ele, a ponte detecta pelo tick mais "
+        "recente, o que só funciona com o mercado aberto",
+    )
     parser.add_argument("--url", help="Endpoint de ingestão (sobrepõe BRIDGE_INGEST_URL)")
+    parser.add_argument(
+        "--interval-ms",
+        type=int,
+        help="Intervalo entre leituras (sobrepõe BRIDGE_POLL_INTERVAL_MS). Padrão: 250 ms, ou "
+        "1000 ms com --symbols all",
+    )
     parser.add_argument("--seed", type=int, default=42, help="Semente do modo sintético")
     parser.add_argument(
         "--volatility",
@@ -49,6 +65,11 @@ def main(argv: list[str] | None = None) -> None:
         env["BRIDGE_INGEST_URL"] = args.url
     if args.symbols:
         env["BRIDGE_SYMBOLS"] = args.symbols
+    if args.interval_ms:
+        env["BRIDGE_POLL_INTERVAL_MS"] = str(args.interval_ms)
+    elif env.get("BRIDGE_SYMBOLS", "").strip().upper() == ALL:
+        # Ler ~2.500 ativos a cada 250 ms ocupa a CPU à toa; 1 s basta para uma lista.
+        env.setdefault("BRIDGE_POLL_INTERVAL_MS", "1000")
     try:
         config = BridgeConfig.from_env(env)
     except ValueError as error:
@@ -56,7 +77,7 @@ def main(argv: list[str] | None = None) -> None:
 
     source: TickSource
     if args.source == "mt5":
-        source = Mt5Source(config.symbols)
+        source = Mt5Source(config.symbols, server_utc_offset_h=args.server_utc_offset)
         kind = Source.LIVE
     else:
         source = SyntheticSource(
@@ -67,7 +88,9 @@ def main(argv: list[str] | None = None) -> None:
         )
         kind = Source.SYNTHETIC
 
-    logging.info("Fonte %s com %s", args.source, ", ".join(config.symbols))
+    names = source.symbols
+    shown = ", ".join(names[:10]) + (f" e mais {len(names) - 10}" if len(names) > 10 else "")
+    logging.info("Fonte %s com %d ativos: %s", args.source, len(names), shown)
     try:
         asyncio.run(run(config, source, kind))
     except KeyboardInterrupt:

@@ -1,6 +1,6 @@
 package br.com.simuladorcarteira.marketdata.adapters.in.web;
 
-import br.com.simuladorcarteira.marketdata.application.ListLatestQuotes;
+import br.com.simuladorcarteira.marketdata.application.ListMarket;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,14 +10,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/quotes")
 class QuoteController {
 
-  private final ListLatestQuotes listLatestQuotes;
+  private final ListMarket listMarket;
 
-  QuoteController(ListLatestQuotes listLatestQuotes) {
-    this.listLatestQuotes = listLatestQuotes;
+  QuoteController(ListMarket listMarket) {
+    this.listMarket = listMarket;
   }
 
   @GetMapping
   List<QuoteMessage> latest() {
-    return listLatestQuotes.all().stream().map(QuoteMessage::from).toList();
+    return listMarket.quotes().stream().map(QuoteMessage::from).toList();
   }
 }

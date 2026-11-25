@@ -4,7 +4,7 @@ from decimal import Decimal
 
 import pytest
 
-from mt5_bridge.protocol import Heartbeat, Source, Tick
+from mt5_bridge.protocol import AssetInfo, Heartbeat, Source, Tick
 
 SAO_PAULO = timezone(timedelta(hours=-3))
 
@@ -36,6 +36,13 @@ def test_tick_without_bid_and_ask_serializes_nulls() -> None:
 
     assert payload["bid"] is None
     assert payload["ask"] is None
+    assert payload["previous_close"] is None
+
+
+def test_tick_serializes_previous_close_as_string() -> None:
+    payload = json.loads(make_tick(previous_close=Decimal("37.00")).to_json())
+
+    assert payload["previous_close"] == "37.00"
 
 
 @pytest.mark.parametrize("last", [Decimal("0"), Decimal("-1")])
@@ -56,4 +63,15 @@ def test_heartbeat_carries_source() -> None:
         "type": "heartbeat",
         "sent_at": "2026-11-23T00:00:00Z",
         "source": "SYNTHETIC",
+    }
+
+
+def test_asset_message_keeps_b3_description_untouched() -> None:
+    payload = json.loads(AssetInfo("PETR4", "PETROBRAS   PN      N2", "BOVESPA\\A VISTA").to_json())
+
+    assert payload == {
+        "type": "asset",
+        "ticker": "PETR4",
+        "description": "PETROBRAS   PN      N2",
+        "path": "BOVESPA\\A VISTA",
     }

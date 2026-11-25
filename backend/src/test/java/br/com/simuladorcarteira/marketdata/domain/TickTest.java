@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import br.com.simuladorcarteira.shared.Money;
 import br.com.simuladorcarteira.shared.Ticker;
+import java.math.BigDecimal;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
 
@@ -62,6 +63,45 @@ class TickTest {
     assertThat(newer.isNewerThan(older)).isTrue();
     assertThat(older.isNewerThan(newer)).isFalse();
     assertThat(older.isNewerThan(older)).isFalse();
+  }
+
+  @Test
+  void shouldComputeChangePercentOverPreviousClose() {
+    Tick tick = tickWithPreviousClose("38.47", "37.00");
+
+    assertThat(tick.changePercent()).isEqualByComparingTo(new BigDecimal("3.97"));
+  }
+
+  @Test
+  void shouldReportNegativeChangeWhenPriceFell() {
+    Tick tick = tickWithPreviousClose("9.70", "9.75");
+
+    assertThat(tick.changePercent()).isEqualByComparingTo(new BigDecimal("-0.51"));
+  }
+
+  @Test
+  void shouldHaveNoChangePercentWhenPreviousCloseIsUnknown() {
+    Tick tick = tickAt(NOW);
+
+    assertThat(tick.changePercent()).isNull();
+  }
+
+  @Test
+  void shouldRejectNonPositivePreviousClose() {
+    assertThatThrownBy(() -> tickWithPreviousClose("10.00", "0.00"))
+        .isInstanceOf(InvalidTickException.class);
+  }
+
+  private static Tick tickWithPreviousClose(String last, String previousClose) {
+    return new Tick(
+        Ticker.of("PETR4"),
+        Money.brl(last),
+        null,
+        null,
+        Money.brl(previousClose),
+        100,
+        NOW,
+        TickSource.LIVE);
   }
 
   private static Tick tickAt(Instant occurredAt) {

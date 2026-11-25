@@ -65,6 +65,26 @@ $env:BRIDGE_INGEST_TOKEN = "local-dev-token"
 
 Com a bolsa aberta os preços começam a piscar em verde e vermelho na tela. A coluna Fonte mostra **MT5**.
 
+### Todos os ativos
+
+Troque a lista por `all` para acompanhar todo o mercado à vista da corretora: ações, units, FIIs,
+Fiagros, ETFs e BDRs (ficam de fora opções, futuros e fracionário):
+
+```powershell
+.venv\Scripts\python -m mt5_bridge --source mt5 --symbols all
+```
+
+A ponte manda o cadastro de cada ativo ao conectar e lê o mercado a cada 1 s (`--interval-ms`
+muda isso). Em <http://localhost:4200/cotacoes> cada categoria tem a sua aba, e a tela só carrega e
+atualiza a aba aberta. A variação em % é calculada sobre o fechamento do pregão anterior, lido do
+candle diário: nos primeiros segundos ela aparece aos poucos, 50 ativos por leitura.
+
+### Horário errado na tela
+
+O MT5 informa os horários no relógio do servidor da corretora. A ponte detecta o fuso comparando o
+tick mais recente com o relógio do PC, o que só funciona com o mercado aberto. Se a coluna Horário
+ficar adiantada ou atrasada, informe o fuso: `--server-utc-offset -3`.
+
 ### Mercado fechado
 
 Troque a fonte para a sintética, que não precisa do MT5:
@@ -84,4 +104,5 @@ A mesma semente sempre gera a mesma sequência de preços.
 | `Conexão perdida (HTTP 401)` | Token da ponte diferente do backend; confira `BRIDGE_INGEST_TOKEN` |
 | `Conexão perdida` repetindo | Backend ainda subindo ou parado; a ponte reconecta sozinha |
 | Selo **Conectando…** no navegador | Backend parado ou o `npm start` sem o proxy |
+| Porta 8080 ocupada (Apache, XAMPP, outro projeto) | Suba o backend com `"-Dspring-boot.run.arguments=--server.port=8081"`, troque `8080` por `8081` no `frontend/proxy.conf.json` e passe `--url ws://localhost:8081/ingest` à ponte |
 | Preços parados com a bolsa aberta | Pré-abertura ou leilão; a ponte usa a melhor oferta de compra até sair negócio |
