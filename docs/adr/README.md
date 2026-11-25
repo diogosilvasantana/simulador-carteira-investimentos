@@ -15,6 +15,7 @@ Formato: contexto, opções consideradas, decisão e consequências. Um ADR acei
 | [ADR-009](0009-maven-como-ferramenta-de-build.md) | Maven como ferramenta de build do backend | Aceito |
 | [ADR-010](0010-catalogo-de-ativos-pela-especificacao-b3.md) | Catálogo de ativos pela especificação B3 do MT5, enriquecido por fontes oficiais | Aceito |
 | [ADR-011](0011-renda-fixa-simulada-com-indexadores-oficiais.md) | Renda fixa simulada com indexadores oficiais | Aceito |
-| [ADR-012](0012-carteira-simulada-com-ordens-a-mercado.md) | Carteira simulada com ordens a mercado, em memória | Aceito |
+| [ADR-012](0012-carteira-simulada-com-ordens-a-mercado.md) | Carteira simulada com ordens a mercado, em memória | Substituído em parte pelo ADR-013 |
+| [ADR-013](0013-carteira-persistida-com-sql-explicito-e-h2-local.md) | Carteira persistida com SQL explícito, PostgreSQL no servidor e H2 no PC | Aceito |
 
 Modelo para novos ADRs: [template.md](template.md)

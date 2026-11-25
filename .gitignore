@@ -37,3 +37,6 @@ mt5-bridge/*.csv
 
 # Logs locais (ex.: backend/run.log do spring-boot:run)
 *.log
+
+# Banco H2 do perfil local
+backend/data/

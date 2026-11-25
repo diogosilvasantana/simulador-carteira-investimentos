@@ -4,6 +4,9 @@ spring:
   threads:
     virtual:
       enabled: true
+  flyway:
+    # SQL comum aos dois bancos e, à parte, o que só existe em um deles (ADR-013)
+    locations: classpath:db/migration/common,classpath:db/migration/{vendor}
   jpa:
     # A sessão não fica aberta durante a resposta; o schema é só do Flyway e o Hibernate confere.
     open-in-view: false
