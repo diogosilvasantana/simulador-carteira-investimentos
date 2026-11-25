@@ -79,6 +79,7 @@ class FixedIncomeApiIntegrationTest {
         .contains("\"id\":\"tesouro-selic\"")
         .contains("\"id\":\"lci-92\"")
         .contains("\"incomeTaxExempt\":true")
-        .contains("\"gracePeriodDays\":90");
+        .contains("\"gracePeriodDays\":184")
+        .doesNotContain("\"gracePeriodDays\":90");
   }
 }
