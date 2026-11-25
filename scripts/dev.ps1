@@ -75,7 +75,10 @@ function Wait-Url([string] $url, [int] $seconds, [scriptblock] $isReady) {
 if ($Stop) { Stop-Dev; exit 0 }
 
 if (Test-Path $pidFile) {
-  Fail 'Já existe uma execução aberta. Rode .\dev.cmd -Stop antes de subir de novo.'
+  $alive = Get-Content $pidFile | Where-Object { Get-Process -Id $_ -ErrorAction SilentlyContinue }
+  if ($alive) { Fail 'Já existe uma execução aberta. Rode .\dev.cmd -Stop antes de subir de novo.' }
+  # Janelas de uma execução anterior que já foram fechadas: nada a encerrar.
+  Remove-Item $pidFile
 }
 
 Write-Step 'Conferindo pré-requisitos'
@@ -109,9 +112,9 @@ Write-Step "Subindo o backend na porta $Port (a primeira vez baixa dependências
 Start-DevWindow 'Simulador - backend' (Join-Path $root 'backend') (
   ".\mvnw.cmd spring-boot:run `"-Dspring-boot.run.profiles=local`" " +
   "`"-Dspring-boot.run.arguments=--server.port=$Port`"")
-$healthy = Wait-Url "http://localhost:$Port/actuator/health" 600 {
-  param($r) $r.Content -match '"status"\s*:\s*"UP"'
-}
+# 200 basta: o actuator responde 503 quando algo não está saudável. Não dá para ler o corpo, porque
+# o PowerShell 5.1 trata o tipo application/vnd.spring-boot.actuator.v3+json como binário.
+$healthy = Wait-Url "http://localhost:$Port/actuator/health" 600 { param($r) $r.StatusCode -eq 200 }
 if (-not $healthy) { Fail 'O backend não respondeu em 10 minutos. Veja a janela "Simulador - backend".' }
 Write-Ok "Backend no ar: http://localhost:$Port"
 
