@@ -1,0 +1,136 @@
+<section class="fixed-income">
+  <header>
+    <h1>Renda fixa</h1>
+    <p class="lead">
+      Produtos pós-fixados de treino, rendendo sobre o CDI oficial do Banco Central, com IR e IOF
+      descontados no resgate.
+    </p>
+  </header>
+
+  <h2>Indexadores</h2>
+  @if (indexes() === null) {
+    <p class="muted">Carregando…</p>
+  } @else if (indexes()!.length === 0) {
+    <p class="muted">
+      Os indexadores ainda não chegaram do Banco Central. Eles são buscados na subida do backend.
+    </p>
+  } @else {
+    <div class="indexes">
+      @for (rate of indexes(); track rate.index) {
+        <article class="card">
+          <span class="card__label">{{ indexLabels[rate.index] }}</span>
+          @if (rate.annualPercent !== null) {
+            <strong class="card__value">{{ money(rate.annualPercent) }}% ao ano</strong>
+            @if (rate.index === 'CDI') {
+              <span class="muted">{{ rate.percent.replace('.', ',') }}% ao dia</span>
+            }
+          } @else {
+            <strong class="card__value">{{ money(rate.percent) }}% {{ rate.unit.slice(2) }}</strong>
+          }
+          <span class="muted">em {{ rate.date | date: 'dd/MM/yyyy' }}</span>
+        </article>
+      }
+    </div>
+  }
+
+  <h2>Simular</h2>
+  <form class="form" (submit)="$event.preventDefault(); simulate()">
+    <label>
+      Valor (R$)
+      <input
+        name="amount"
+        inputmode="decimal"
+        [value]="amount()"
+        (input)="amount.set(value($event))"
+        [attr.aria-invalid]="principal() === null"
+      />
+    </label>
+    <label>
+      Aplicação
+      <input name="start" type="date" [value]="start()" (input)="start.set(value($event))" />
+    </label>
+    <label>
+      Resgate
+      <input
+        name="end"
+        type="date"
+        [value]="end()"
+        (input)="end.set(value($event))"
+        [attr.aria-invalid]="!validPeriod()"
+      />
+    </label>
+    <button type="submit" [disabled]="principal() === null || !validPeriod() || simulating()">
+      {{ simulating() ? 'Simulando…' : 'Simular' }}
+    </button>
+  </form>
+  @if (principal() === null) {
+    <p class="warning">Informe um valor positivo, como 10.000,00.</p>
+  } @else if (!validPeriod()) {
+    <p class="warning">A data de resgate precisa ser depois da aplicação.</p>
+  }
+
+  @if (error(); as message) {
+    <p class="warning" role="alert">{{ message }}</p>
+  }
+
+  @if (results().length > 0) {
+    <div class="table-wrap">
+      <table class="results">
+        <thead>
+          <tr>
+            <th scope="col">Produto</th>
+            <th scope="col" class="num">Bruto</th>
+            <th scope="col" class="num">IOF</th>
+            <th scope="col" class="num">IR</th>
+            <th scope="col" class="num">Líquido</th>
+            <th scope="col" class="num">Rendimento líquido</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of results(); track row.product.id; let first = $first) {
+            <tr
+              [class.best]="first && !row.blockedByGracePeriod"
+              [class.blocked]="row.blockedByGracePeriod"
+            >
+              <th scope="row">
+                <span class="kind">{{ kindLabels[row.product.kind] }}</span>
+                {{ row.product.name }}
+                @if (row.product.incomeTaxExempt) {
+                  <span class="tag">isento de IR</span>
+                }
+                @if (row.blockedByGracePeriod) {
+                  <span class="tag tag--warn"
+                    >carência de {{ row.product.gracePeriodDays }} dias</span
+                  >
+                }
+              </th>
+              <td class="num">{{ money(row.simulation.gross) }}</td>
+              <td class="num">{{ money(row.simulation.iof) }}</td>
+              <td class="num">
+                {{ money(row.simulation.incomeTax) }}
+                @if (!row.product.incomeTaxExempt) {
+                  <small class="muted"
+                    >{{ row.simulation.incomeTaxRatePercent.replace('.', ',') }}%</small
+                  >
+                }
+              </td>
+              <td class="num">
+                <strong>{{ money(row.simulation.net) }}</strong>
+              </td>
+              <td class="num gain">+{{ money(netYield(row)) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="muted note">
+      {{ results()[0].simulation.holdingDays }} dias corridos.
+      @if (projected()) {
+        O CDI oficial vai até {{ results()[0].simulation.ratesUntil | date: 'dd/MM/yyyy' }}; os
+        {{ results()[0].simulation.projectedBusinessDays }} dias úteis seguintes foram projetados
+        com a última taxa.
+      }
+      O Tesouro Selic é aproximado por 100% do CDI e não considera a taxa de custódia da B3.
+    </p>
+  }
+</section>

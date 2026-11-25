@@ -1,0 +1,162 @@
+:host {
+  display: block;
+}
+
+.lead,
+.muted {
+  color: var(--muted);
+}
+
+h2 {
+  font-size: 1.05rem;
+  margin: 1.75rem 0 0.75rem;
+}
+
+.indexes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0.75rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.85rem;
+
+  &__label {
+    font-weight: 600;
+  }
+
+  &__value {
+    font-size: 1.35rem;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  input,
+  button {
+    min-height: 44px;
+    padding: 0 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font: inherit;
+    color: var(--text);
+    background: var(--background);
+  }
+
+  input[aria-invalid='true'] {
+    border-color: var(--loss);
+  }
+
+  button {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.55;
+      cursor: default;
+    }
+  }
+}
+
+.warning {
+  color: var(--loss);
+}
+
+.table-wrap {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.results {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  th,
+  td {
+    padding: 0.65rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  thead th {
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  tbody th {
+    font-weight: 500;
+  }
+
+  .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  small {
+    margin-left: 0.25rem;
+  }
+
+  .best {
+    background: color-mix(in srgb, var(--gain) 9%, transparent);
+  }
+
+  .blocked {
+    opacity: 0.6;
+  }
+}
+
+.gain {
+  color: var(--gain);
+}
+
+.kind {
+  display: inline-block;
+  min-width: 3.6rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.tag {
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.72rem;
+
+  &--warn {
+    color: var(--loss);
+    border-color: var(--loss);
+  }
+}
+
+.note {
+  font-size: 0.8rem;
+  max-width: 60rem;
+}
