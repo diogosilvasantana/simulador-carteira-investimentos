@@ -1,0 +1,96 @@
+<section class="page">
+  <header class="page-head">
+    <div>
+      <h1>Radar</h1>
+      <p class="lead">
+        Os ativos que você quer acompanhar antes de decidir. Atualiza a cada 5 segundos.
+      </p>
+    </div>
+    <form class="add field" (submit)="add($event)">
+      <label class="sr-only" for="radar-ticker">Código do ativo</label>
+      <input
+        id="radar-ticker"
+        placeholder="Código, ex.: PETR4"
+        autocomplete="off"
+        spellcheck="false"
+        [value]="draft()"
+        (input)="draft.set($any($event.target).value)"
+      />
+      <button type="submit" class="btn btn--primary" [disabled]="adding()">
+        <app-icon name="plus" [size]="16" /> Adicionar
+      </button>
+    </form>
+  </header>
+  @if (error(); as e) {
+    <p class="notice notice--error" role="alert">{{ e }}</p>
+  }
+
+  @if (watchlist.tickers().length === 0) {
+    <div class="empty panel">
+      <app-icon name="radar" [size]="28" />
+      <h2>Seu Radar está vazio</h2>
+      <p>
+        Adicione pelo código ou marque a estrela na página de qualquer ativo. Ele fica guardado
+        neste navegador.
+      </p>
+      <a class="btn" routerLink="/cotacoes">Explorar cotações</a>
+    </div>
+  } @else {
+    <ul class="cards">
+      @for (ticker of watchlist.tickers(); track ticker) {
+        @let q = quotes()[ticker];
+        <li class="card panel">
+          <a class="card__link" [routerLink]="['/ativo', ticker]">
+            <span class="mono" [style.background]="typeColor(q?.type ?? null)" aria-hidden="true">{{
+              ticker.slice(0, 2)
+            }}</span>
+            <span class="card__name">
+              <strong>{{ ticker }}</strong>
+              <span>{{ q?.name ?? 'Carregando…' }}</span>
+            </span>
+          </a>
+          <div class="card__price">
+            <strong class="num">{{ brl(q?.last) }}</strong>
+            <span [class]="'change change--' + tone(q?.changePercent)">
+              @if (tone(q?.changePercent) !== 'flat') {
+                <span class="change__arrow" aria-hidden="true"></span>
+              }
+              {{ percent(q?.changePercent, true) }}
+            </span>
+          </div>
+          <dl class="card__facts">
+            <div>
+              <dt>Fech. anterior</dt>
+              <dd class="num">{{ brl(q?.previousClose) }}</dd>
+            </div>
+            <div>
+              <dt>Volume</dt>
+              <dd class="num">{{ formatVolume(q?.volume ?? null) }}</dd>
+            </div>
+          </dl>
+          <div class="card__actions">
+            <button
+              type="button"
+              class="btn btn--sm btn--primary"
+              (click)="trade.open(ticker, 'BUY')"
+            >
+              Comprar
+            </button>
+            <button type="button" class="btn btn--sm" (click)="trade.open(ticker, 'SELL')">
+              Vender
+            </button>
+            <button
+              type="button"
+              class="icon-btn"
+              [attr.aria-label]="'Tirar ' + ticker + ' do Radar'"
+              title="Tirar do Radar"
+              (click)="watchlist.toggle(ticker)"
+            >
+              <app-icon name="close" [size]="16" />
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</section>

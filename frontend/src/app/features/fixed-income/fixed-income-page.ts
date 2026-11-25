@@ -1,4 +1,7 @@
 import { DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { PortfolioError, PortfolioService } from '../../core/portfolio';
+import { brl } from '../../shared/money';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { forkJoin } from 'rxjs';
@@ -21,13 +24,15 @@ const API = '/api/fixed-income';
 
 @Component({
   selector: 'app-fixed-income-page',
-  imports: [DatePipe],
+  imports: [DatePipe, RouterLink],
   templateUrl: './fixed-income-page.html',
   styleUrl: './fixed-income-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FixedIncomePage {
   private readonly http = inject(HttpClient);
+  protected readonly portfolio = inject(PortfolioService);
+  protected readonly brl = brl;
 
   protected readonly indexLabels = INDEX_LABELS;
   protected readonly kindLabels = KIND_LABELS;
@@ -38,6 +43,12 @@ export class FixedIncomePage {
   protected readonly results = signal<readonly ProductResult[]>([]);
   protected readonly simulating = signal(false);
   protected readonly error = signal<string | null>(null);
+
+  protected readonly applying = signal<string | null>(null);
+  protected readonly applied = signal<{ readonly name: string; readonly amount: string } | null>(
+    null,
+  );
+  protected readonly applyError = signal<string | null>(null);
 
   protected readonly amount = signal('10.000,00');
   protected readonly start = signal(isoDate(new Date()));
@@ -50,6 +61,7 @@ export class FixedIncomePage {
   );
 
   constructor() {
+    this.portfolio.load();
     this.http.get<IndexRate[]>(`${API}/indexes`).subscribe({
       next: (rates) => this.indexes.set(rates),
       error: () => this.indexes.set([]),
@@ -99,6 +111,29 @@ export class FixedIncomePage {
           error.status === 503
             ? 'Os indexadores ainda estão chegando do Banco Central. Tente de novo em instantes.'
             : 'Não foi possível simular. Confira o valor e as datas.',
+        );
+      },
+    });
+  }
+
+  /** Aplica hoje, na carteira simulada, o valor do formulário no produto escolhido. */
+  protected apply(product: FixedIncomeProduct): void {
+    const principal = this.principal();
+    if (principal === null) {
+      return;
+    }
+    this.applying.set(product.id);
+    this.applied.set(null);
+    this.applyError.set(null);
+    this.portfolio.invest(product.id, principal).subscribe({
+      next: () => {
+        this.applying.set(null);
+        this.applied.set({ name: product.name, amount: principal });
+      },
+      error: (error: unknown) => {
+        this.applying.set(null);
+        this.applyError.set(
+          error instanceof PortfolioError ? error.message : 'Não foi possível aplicar agora.',
         );
       },
     });

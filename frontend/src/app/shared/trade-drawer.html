@@ -1,0 +1,166 @@
+@if (trade.current(); as request) {
+  <div class="overlay" (click)="close()" aria-hidden="true"></div>
+  <aside
+    class="drawer"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="'Negociar ' + request.ticker"
+  >
+    <header class="head">
+      <span class="mono" [style.background]="typeColor(quote()?.type ?? null)" aria-hidden="true">{{
+        request.ticker.slice(0, 2)
+      }}</span>
+      <span class="head__asset">
+        <strong>{{ request.ticker }}</strong>
+        <span>{{ quote()?.name ?? '' }}</span>
+      </span>
+      <span class="head__price num">
+        <strong>{{ brl(quote()?.last) }}</strong>
+        <span [class]="'change change--' + tone(quote()?.changePercent)">
+          @if (tone(quote()?.changePercent) !== 'flat') {
+            <span class="change__arrow" aria-hidden="true"></span>
+          }
+          {{ percent(quote()?.changePercent, true) }}
+        </span>
+      </span>
+      <button type="button" class="icon-btn" (click)="close()" aria-label="Fechar">
+        <app-icon name="close" [size]="18" />
+      </button>
+    </header>
+
+    @switch (step()) {
+      @case ('form') {
+        <div class="sides" role="tablist" aria-label="Lado da ordem">
+          <button
+            type="button"
+            role="tab"
+            class="side side--buy"
+            [attr.aria-selected]="side() === 'BUY'"
+            (click)="side.set('BUY')"
+          >
+            Comprar
+          </button>
+          <button
+            type="button"
+            role="tab"
+            class="side side--sell"
+            [attr.aria-selected]="side() === 'SELL'"
+            (click)="side.set('SELL')"
+          >
+            Vender
+          </button>
+        </div>
+
+        <label class="field">
+          Quantidade
+          <span class="stepper">
+            <button type="button" (click)="step1(-1)" aria-label="Diminuir">−</button>
+            <input
+              inputmode="numeric"
+              [value]="quantity()"
+              (input)="setQuantity($any($event.target).value)"
+            />
+            <button type="button" (click)="step1(1)" aria-label="Aumentar">+</button>
+          </span>
+        </label>
+
+        <dl class="lines">
+          <div>
+            <dt>Preço agora</dt>
+            <dd class="num">{{ brl(quote()?.last) }}</dd>
+          </div>
+          <div>
+            <dt>Valor estimado</dt>
+            <dd class="num">{{ estimate() === null ? '—' : brl(estimate()!.toFixed(2)) }}</dd>
+          </div>
+          @if (side() === 'BUY') {
+            <div>
+              <dt>Caixa disponível</dt>
+              <dd class="num">{{ brl(portfolio.summary()?.cash) }}</dd>
+            </div>
+          } @else {
+            <div>
+              <dt>Você tem</dt>
+              <dd class="num">{{ held() }} {{ held() === 1 ? 'unidade' : 'unidades' }}</dd>
+            </div>
+          }
+        </dl>
+
+        @if (overCash()) {
+          <p class="notice notice--warning">
+            O caixa não cobre essa compra. Faça um aporte na Carteira ou diminua a quantidade.
+          </p>
+        }
+        @if (overPosition()) {
+          <p class="notice notice--warning">Você só pode vender até {{ held() }} unidades.</p>
+        }
+        @if (error(); as message) {
+          <p class="notice notice--error" role="alert">{{ message }}</p>
+        }
+
+        <button
+          type="button"
+          class="btn btn--primary btn--block"
+          [disabled]="busy() || !quote()?.last || overCash() || overPosition()"
+          (click)="toReview()"
+        >
+          {{ busy() ? 'Calculando…' : 'Revisar ordem' }}
+        </button>
+        <p class="hint">Ordem a mercado: executa no último preço recebido. Nada é enviado à B3.</p>
+      }
+      @case ('review') {
+        @if (review(); as r) {
+          <h2 class="title">Confira antes de enviar</h2>
+          <dl class="lines lines--review">
+            <div>
+              <dt>Operação</dt>
+              <dd>
+                {{ r.side === 'BUY' ? 'Compra' : 'Venda' }} de {{ r.quantity }} {{ r.ticker }}
+              </dd>
+            </div>
+            <div>
+              <dt>Preço a mercado</dt>
+              <dd class="num">{{ brl(r.price) }}</dd>
+            </div>
+            <div>
+              <dt>Valor</dt>
+              <dd class="num">{{ brl(r.gross) }}</dd>
+            </div>
+            <div>
+              <dt>Custos da B3 <small>emolumentos e liquidação</small></dt>
+              <dd class="num">{{ brl(r.fees) }}</dd>
+            </div>
+            <div class="total">
+              <dt>{{ r.side === 'BUY' ? 'Sai do caixa' : 'Entra no caixa' }}</dt>
+              <dd class="num">{{ brl(r.total) }}</dd>
+            </div>
+          </dl>
+          @if (error(); as message) {
+            <p class="notice notice--error" role="alert">{{ message }}</p>
+          }
+          <div class="actions">
+            <button type="button" class="btn" (click)="step.set('form')">Voltar</button>
+            <button type="button" class="btn btn--primary" [disabled]="busy()" (click)="confirm()">
+              {{ busy() ? 'Enviando…' : r.side === 'BUY' ? 'Confirmar compra' : 'Confirmar venda' }}
+            </button>
+          </div>
+        }
+      }
+      @case ('done') {
+        @if (done(); as d) {
+          <div class="done" role="status">
+            <span class="done__mark" aria-hidden="true"><app-icon name="check" [size]="22" /></span>
+            <h2 class="title">{{ d.side === 'BUY' ? 'Compra executada' : 'Venda executada' }}</h2>
+            <p>
+              {{ d.quantity }} {{ d.ticker }} a {{ brl(d.price) }}. Total de {{ brl(d.total) }}.
+            </p>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn" (click)="step.set('form')">Nova ordem</button>
+            <a class="btn btn--primary" routerLink="/carteira" (click)="close()">Ver carteira</a>
+          </div>
+        }
+      }
+    }
+  </aside>
+}

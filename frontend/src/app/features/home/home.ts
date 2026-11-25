@@ -1,18 +1,24 @@
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { PortfolioService } from '../../core/portfolio';
+import { ASSET_CLASSES } from '../../shared/asset-classes';
+import { brl, percent, signedBrl, tone } from '../../shared/money';
 import { TypeCarousel, TypeTile } from '../../shared/type-carousel';
-import { CATEGORIES } from '../quotes/categories';
-
-interface Phase {
-  readonly name: string;
-  readonly description: string;
-  readonly ready: boolean;
-}
+import { CATEGORIES, typeColor } from '../quotes/categories';
+import { formatVolume } from '../quotes/format';
+import { Quote, compareDecimal } from '../quotes/quote';
+import { Movers, movers } from './movers';
 
 interface CategoryCount {
   readonly slug: string;
   readonly count: number;
+}
+
+interface MoverGroup {
+  readonly id: keyof Movers;
+  readonly title: string;
+  readonly empty: string;
 }
 
 @Component({
@@ -23,7 +29,40 @@ interface CategoryCount {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Home {
+  protected readonly portfolio = inject(PortfolioService);
+
+  protected readonly brl = brl;
+  protected readonly signedBrl = signedBrl;
+  protected readonly percent = percent;
+  protected readonly tone = tone;
+  protected readonly typeColor = typeColor;
+  protected readonly formatVolume = formatVolume;
+
   private readonly counts = signal<Readonly<Record<string, number>>>({});
+  private readonly quotes = signal<readonly Quote[] | null>(null);
+
+  protected readonly groups: readonly MoverGroup[] = [
+    { id: 'gainers', title: 'Maiores altas', empty: 'Nenhum ativo em alta ainda.' },
+    { id: 'losers', title: 'Maiores baixas', empty: 'Nenhum ativo em baixa ainda.' },
+    { id: 'active', title: 'Mais negociados', empty: 'Ainda não houve negócios.' },
+  ];
+  protected readonly market = computed(() => {
+    const list = this.quotes();
+    return list === null ? null : movers(list);
+  });
+
+  /** Carteira com algum aporte: a Início vira um resumo dela em vez do convite para começar. */
+  protected readonly started = computed(() => {
+    const s = this.portfolio.summary();
+    return s !== null && compareDecimal(s.contributed, '0') > 0;
+  });
+  protected readonly allocation = computed(() => {
+    const list = this.portfolio.summary()?.allocation ?? [];
+    return ASSET_CLASSES.flatMap((info) => {
+      const entry = list.find((a) => a.assetClass === info.slug);
+      return entry ? [{ info, entry }] : [];
+    });
+  });
 
   protected readonly tiles = computed<TypeTile[]>(() => {
     const counts = this.counts();
@@ -49,37 +88,17 @@ export class Home {
     return tiles;
   });
 
-  protected readonly phases = signal<readonly Phase[]>([
-    {
-      name: 'Cotações ao vivo',
-      description: 'Todos os ativos da B3 pelo MT5, por tipo',
-      ready: true,
-    },
-    {
-      name: 'Renda fixa',
-      description: 'CDI oficial, IR e IOF, comparação pelo líquido',
-      ready: true,
-    },
-    {
-      name: 'Carteira e ordens',
-      description: 'Aportes, compra e venda, posição e preço médio',
-      ready: false,
-    },
-    { name: 'Proventos', description: 'Dividendos, JCP e reinvestimento automático', ready: false },
-    {
-      name: 'Rentabilidade e rebalanceamento',
-      description: 'Carteira contra CDI e Ibovespa, alocação-alvo',
-      ready: false,
-    },
-  ]);
-
   constructor() {
-    inject(HttpClient)
-      .get<CategoryCount[]>('/api/categories')
-      .subscribe({
-        next: (list) => this.counts.set(Object.fromEntries(list.map((c) => [c.slug, c.count]))),
-        // Sem backend, o carrossel funciona sem as contagens.
-        error: () => undefined,
-      });
+    const http = inject(HttpClient);
+    this.portfolio.load();
+    http.get<CategoryCount[]>('/api/categories').subscribe({
+      next: (list) => this.counts.set(Object.fromEntries(list.map((c) => [c.slug, c.count]))),
+      // Sem backend, o carrossel funciona sem as contagens.
+      error: () => undefined,
+    });
+    http.get<Quote[]>('/api/quotes').subscribe({
+      next: (list) => this.quotes.set(list),
+      error: () => this.quotes.set([]),
+    });
   }
 }

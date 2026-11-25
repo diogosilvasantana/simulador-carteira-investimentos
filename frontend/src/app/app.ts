@@ -10,6 +10,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { QuoteStream } from './features/quotes/quote-stream';
+import { TradeDrawer } from './shared/trade-drawer';
 import { BrandMark } from './shared/brand-mark';
 import { Icon, IconName } from './shared/icon';
 
@@ -24,17 +25,19 @@ const COLLAPSED_KEY = 'simulador.nav.collapsed';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon, BrandMark],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon, BrandMark, TradeDrawer],
   templateUrl: './app.html',
   styleUrl: './app.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class.collapsed]': 'collapsed()' },
 })
 export class App {
-  // Só telas com backend de verdade entram no menu: carteira e ordens chegam com seus módulos.
+  // Só telas com backend de verdade entram no menu.
   protected readonly items: readonly NavItem[] = [
     { path: '/', label: 'Início', icon: 'home', exact: true },
+    { path: '/carteira', label: 'Carteira', icon: 'wallet', exact: false },
     { path: '/cotacoes', label: 'Cotações', icon: 'quotes', exact: false },
+    { path: '/radar', label: 'Radar', icon: 'radar', exact: false },
     { path: '/renda-fixa', label: 'Renda fixa', icon: 'fixedIncome', exact: false },
   ];
 
@@ -56,8 +59,11 @@ export class App {
     disconnected: 'Cotações desconectadas',
   } as const;
 
-  // O fluxo de cotações só abre na tela de Cotações; fora dela não há conexão cujo estado mostrar.
-  protected readonly onQuotes = computed(() => this.url().startsWith('/cotacoes'));
+  // O fluxo de cotações só abre em Cotações e na página do ativo; fora delas não há conexão cujo
+  // estado mostrar.
+  protected readonly onQuotes = computed(() =>
+    ['/cotacoes', '/ativo'].some((prefix) => this.url().startsWith(prefix)),
+  );
 
   constructor() {
     effect(() => writeCollapsed(this.collapsed()));
