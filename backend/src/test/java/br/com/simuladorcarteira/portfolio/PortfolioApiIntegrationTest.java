@@ -8,6 +8,7 @@ import br.com.simuladorcarteira.marketdata.domain.TickSource;
 import br.com.simuladorcarteira.shared.Money;
 import br.com.simuladorcarteira.shared.Ticker;
 import java.time.Instant;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +70,7 @@ class PortfolioApiIntegrationTest {
     assertThat(status.value()).isEqualTo(422);
   }
 
-  private String post(String uri, String body) {
+  private @Nullable String post(String uri, String body) {
     return client
         .post()
         .uri(uri)
