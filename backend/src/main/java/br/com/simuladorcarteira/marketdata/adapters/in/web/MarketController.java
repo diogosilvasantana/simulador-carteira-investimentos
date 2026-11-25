@@ -2,9 +2,11 @@ package br.com.simuladorcarteira.marketdata.adapters.in.web;
 
 import br.com.simuladorcarteira.marketdata.application.ListMarket;
 import br.com.simuladorcarteira.marketdata.domain.AssetCategory;
+import br.com.simuladorcarteira.shared.Ticker;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,6 +28,22 @@ class MarketController {
     return listMarket.countByCategory().entrySet().stream()
         .map(entry -> new CategoryMessage(entry.getKey().slug(), entry.getValue()))
         .toList();
+  }
+
+  @GetMapping("/assets/{ticker}")
+  QuoteMessage asset(@PathVariable("ticker") String ticker) {
+    Ticker chosen;
+    try {
+      chosen = new Ticker(ticker);
+    } catch (IllegalArgumentException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    }
+    return listMarket
+        .quote(chosen)
+        .map(QuoteMessage::from)
+        .orElseThrow(
+            () ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Ativo desconhecido: " + ticker));
   }
 
   @GetMapping("/assets")

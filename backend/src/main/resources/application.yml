@@ -16,6 +16,12 @@ management:
         enabled: true
 
 simulador:
+  # Custos de negociação versionados por data: emolumentos e liquidação da B3 sobre o volume.
+  # A corretagem é zero, como na maioria das corretoras para pessoa física.
+  portfolio:
+    trading-costs:
+      - valid-from: "2019-01-01"
+        fee-percent: 0.03
   ingest:
     # Segredo da ponte MT5 / simulador de pregão. Vazio = ingestão desligada.
     token: ${INGEST_TOKEN:}

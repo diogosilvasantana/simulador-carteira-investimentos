@@ -24,6 +24,11 @@ Use sempre estes nomes no código. Se um conceito novo surgir, adicione-o aqui e
 | Ticker | `Ticker` |
 | Ordem | `Order` |
 | Execução | `Execution` |
+| Carteira | `Portfolio` |
+| Classe de ativo da carteira | `AssetClass` |
+| Lado da ordem (compra, venda) | `OrderSide` |
+| Prévia da ordem | `OrderQuote` |
+| Custos de negociação | `TradingCosts` |
 | Posição | `Position` |
 | Preço médio | `averagePrice` |
 | Resultado realizado / não realizado | `realizedPnl` / `unrealizedPnl` |
